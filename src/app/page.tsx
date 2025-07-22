@@ -1,24 +1,124 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Bot, Lightbulb, ListChecks } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function WelcomePage() {
+  const features = [
+    {
+      icon: <Bot className="h-8 w-8 text-primary" />,
+      title: 'AI-Powered Tutorial Generation',
+      description: 'Describe any project, and our AI will generate a complete, step-by-step tutorial from scratch, tailored to your needs.',
+    },
+    {
+      icon: <ListChecks className="h-8 w-8 text-primary" />,
+      title: 'Structured Learning Paths',
+      description: 'Projects are broken down into logical steps and granular sub-tasks, providing a clear path from concept to completion.',
+    },
+    {
+      icon: <Lightbulb className="h-8 w-8 text-primary" />,
+      title: 'Personalized Assistance',
+      description: 'Stuck on a task? Ask our integrated AI Assistant for hints, explanations, or code analysis to get you back on track.',
+    },
+  ];
+
   return (
-    <div className="flex flex-col items-center justify-center text-center flex-1 px-4">
-      <h1 className="text-5xl md:text-7xl font-bold font-headline tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-500">
-        Learn by Building
-      </h1>
-      <p className="mt-4 max-w-xl mx-auto text-lg text-muted-foreground">
-        Stop watching tutorials. Start building real-world projects with our AI-guided, step-by-step learning paths.
-      </p>
-      <div className="mt-8">
-        <Button asChild size="lg">
-          <Link href="/project-practice">
-            Start Your First Project <ArrowRight className="ml-2 h-5 w-5" />
-          </Link>
-        </Button>
-      </div>
+    <div className="flex-1 bg-background text-foreground">
+      {/* Hero Section */}
+      <section className="py-20 md:py-32 text-center">
+        <div className="container px-4">
+          <h1 className="text-5xl md:text-7xl font-bold font-headline tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-pink-500">
+            Learn by Building
+          </h1>
+          <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+            Stop watching tutorials. Start building real-world projects with our AI-guided, step-by-step learning paths.
+          </p>
+          <div className="mt-8">
+            <Button asChild size="lg">
+              <Link href="/project-practice">
+                Start Your First Project <ArrowRight className="ml-2 h-5 w-5" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-16 bg-secondary/30">
+        <div className="container px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold font-headline">Why ProjectForgeAI?</h2>
+            <p className="text-muted-foreground mt-2">The best way to learn is by doing. Here's how we help.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center bg-card/80">
+                <CardHeader>
+                  <div className="mx-auto bg-primary/10 p-3 rounded-full w-fit">
+                    {feature.icon}
+                  </div>
+                  <CardTitle className="font-headline mt-4">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-20">
+        <div className="container px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold font-headline">Get Started in 3 Easy Steps</h2>
+            <p className="text-muted-foreground mt-2">Go from idea to implementation in minutes.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative">
+            {/* Dashed lines for larger screens */}
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-px -translate-y-12">
+                <svg width="100%" height="100%">
+                    <line x1="15%" y1="0" x2="85%" y2="0" strokeWidth="2" strokeDasharray="8, 8" className="stroke-border" />
+                </svg>
+            </div>
+            
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background mb-4 z-10">1</div>
+              <h3 className="text-xl font-headline font-semibold">Describe Your Project</h3>
+              <p className="text-muted-foreground mt-2">Tell the AI what you want to build, from a simple website to a complex application.</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background mb-4 z-10">2</div>
+              <h3 className="text-xl font-headline font-semibold">Get Your Plan</h3>
+              <p className="text-muted-foreground mt-2">Receive a detailed, structured learning path with all the steps and sub-tasks laid out.</p>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background mb-4 z-10">3</div>
+              <h3 className="text-xl font-headline font-semibold">Start Building</h3>
+              <p className="text-muted-foreground mt-2">Follow the on-demand instructions and code snippets, learning as you build.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+       {/* Final CTA Section */}
+       <section className="py-16 text-center border-t border-border">
+          <div className="container px-4">
+            <h2 className="text-4xl font-bold font-headline">Ready to Start Building?</h2>
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
+              Turn your ideas into reality and level up your skills today.
+            </p>
+            <div className="mt-8">
+              <Button asChild size="lg">
+                <Link href="/project-practice">
+                  Explore Projects <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
     </div>
   );
 }
