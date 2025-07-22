@@ -7,11 +7,8 @@
  * - PersonalizedAssistanceInput - The input type for the getPersonalizedAssistance function.
  * - PersonalizedAssistanceOutput - The return type for the getPersonalizedAssistance function.
  */
-
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-import {groq} from 'genkitx-groq';
-
+import {z} from 'zod';
+import Groq from 'groq-sdk';
 
 const PersonalizedAssistanceInputSchema = z.object({
   tutorialStep: z
@@ -42,31 +39,36 @@ export type PersonalizedAssistanceOutput = z.infer<
 export async function getPersonalizedAssistance(
   input: PersonalizedAssistanceInput
 ): Promise<PersonalizedAssistanceOutput> {
-  return personalizedAssistanceFlow(input);
+
+  const groq = new Groq({
+    apiKey: input.groqApiKey || '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'
+  });
+
+  const prompt = `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
+
+The user is currently on step: "${input.tutorialStep}"
+They are struggling with the following:
+"${input.userProgress}"
+
+Provide a helpful message that guides them towards resolving their issue and continuing with the tutorial.
+Your message should be encouraging and supportive.`;
+
+  const chatCompletion = await groq.chat.completions.create({
+      messages: [
+          {
+              role: "user",
+              content: prompt,
+          },
+      ],
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      temperature: 0.7,
+      max_tokens: 1024,
+      top_p: 1,
+      stream: false,
+      stop: null
+  });
+
+  const assistanceMessage = chatCompletion.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+  
+  return { assistanceMessage };
 }
-
-const personalizedAssistanceFlow = ai.defineFlow(
-  {
-    name: 'personalizedAssistanceFlow',
-    inputSchema: PersonalizedAssistanceInputSchema,
-    outputSchema: PersonalizedAssistanceOutputSchema,
-  },
-  async input => {
-    const {output} = await ai.generate({
-      model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
-      prompt: `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
-
-      The user is currently on step: ${input.tutorialStep}
-      They are struggling with the following:
-      ${input.userProgress}
-    
-      Provide a helpful message that guides them towards resolving their issue and continuing with the tutorial.
-      Your message should be encouraging and supportive.`,
-      config: {
-        apiKey: input.groqApiKey || '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',
-      },
-    });
-
-    return {assistanceMessage: output!.text!};
-  }
-);
