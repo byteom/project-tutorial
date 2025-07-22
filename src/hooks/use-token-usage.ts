@@ -46,7 +46,7 @@ export function useTokenUsage() {
   );
 
   const addTokens = useCallback(
-    async (count: number) => {
+    (count: number) => {
       setTokenCount((prevCount) => {
         const newCount = prevCount + count;
         saveTokenCount(newCount);

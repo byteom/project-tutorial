@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, Lightbulb, ListChecks } from 'lucide-react';
+import { ArrowRight, Bot, Lightbulb, ListChecks, Cpu } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function WelcomePage() {
@@ -25,6 +25,35 @@ export default function WelcomePage() {
 
   return (
     <div className="flex-1 bg-background text-foreground">
+       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
+            <div className="container flex h-14 items-center">
+              <Link href="/" className="mr-6 flex items-center space-x-2">
+                <Cpu className="h-6 w-6 text-primary" />
+                <span className="font-bold font-headline sm:inline-block">
+                  PROJECTAI
+                </span>
+              </Link>
+              <nav className="flex items-center space-x-6 text-sm font-medium ml-auto">
+                <Link
+                  href="/project-practice"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Projects
+                </Link>
+                <Link
+                  href="/contact"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Contact Us
+                </Link>
+                 <Link
+                  href="/auth"
+                >
+                  <Button>Get Started</Button>
+                </Link>
+              </nav>
+            </div>
+          </header>
       {/* Hero Section */}
       <section className="py-20 md:py-32 text-center">
         <div className="container px-4">
@@ -119,6 +148,9 @@ export default function WelcomePage() {
             </div>
           </div>
         </section>
+        <footer className="p-4 text-center text-xs text-muted-foreground border-t">
+              AI-Generated Content. Please review this guidance carefully. AI can make mistakes, so always verify critical information and use your judgment.
+          </footer>
     </div>
   );
 }

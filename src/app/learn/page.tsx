@@ -20,6 +20,7 @@ import rehypeRaw from "rehype-raw";
 import rehypePrism from "rehype-prism-plus";
 import CodeBlock from "@/components/projects/CodeBlock";
 import type { LearningPath } from "@/lib/types";
+import { AppSidebar } from "@/components/layout/AppSidebar";
 
 const formSchema = z.object({
   topic: z.string().min(2, {
@@ -76,7 +77,9 @@ export default function LearnAnythingPage() {
   };
   
   return (
-    <div className="container mx-auto max-w-4xl py-12 px-4">
+    <div className="flex">
+    <AppSidebar />
+    <div className="container mx-auto max-w-4xl py-12 px-4 flex-1">
       <Card className="w-full">
         <CardHeader className="text-center">
             <div className="mx-auto bg-primary/10 p-4 rounded-full w-fit mb-4">
@@ -192,6 +195,7 @@ export default function LearnAnythingPage() {
             </Accordion>
         </div>
       )}
+    </div>
     </div>
   );
 }
