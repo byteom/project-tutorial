@@ -1,20 +1,25 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, Lightbulb, ListChecks, Cpu } from 'lucide-react';
+import { ArrowRight, Bot, Lightbulb, ListChecks, Cpu, GraduationCap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function WelcomePage() {
   const features = [
     {
       icon: <Bot className="h-8 w-8 text-primary" />,
-      title: 'AI-Powered Tutorial Generation',
+      title: 'AI-Powered Project Generation',
       description: 'Describe any project, and our AI will generate a complete, step-by-step tutorial from scratch, tailored to your needs.',
+    },
+    {
+      icon: <GraduationCap className="h-8 w-8 text-primary" />,
+      title: 'Dynamic Curriculum Generation',
+      description: 'Want to learn a new skill? Our AI can generate a personalized, step-by-step curriculum on any topic for you.',
     },
     {
       icon: <ListChecks className="h-8 w-8 text-primary" />,
       title: 'Structured Learning Paths',
-      description: 'Projects are broken down into logical steps and granular sub-tasks, providing a clear path from concept to completion.',
+      description: 'All tutorials and curriculums are broken down into logical steps and granular sub-tasks, providing a clear path to mastery.',
     },
     {
       icon: <Lightbulb className="h-8 w-8 text-primary" />,
@@ -41,6 +46,12 @@ export default function WelcomePage() {
                   Projects
                 </Link>
                 <Link
+                  href="/learn"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Learn
+                </Link>
+                <Link
                   href="/contact"
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
                 >
@@ -61,7 +72,7 @@ export default function WelcomePage() {
             Learn by Building
           </h1>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-            Stop watching tutorials. Start building real-world projects with our AI-guided, step-by-step learning paths.
+            Stop watching tutorials. Start building real-world projects and master new skills with our AI-guided, step-by-step learning paths.
           </p>
           <div className="mt-8">
             <Button asChild size="lg">
@@ -80,7 +91,7 @@ export default function WelcomePage() {
             <h2 className="text-4xl font-bold font-headline">Why ProjectForgeAI?</h2>
             <p className="text-muted-foreground mt-2">The best way to learn is by doing. Here's how we help.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
               <Card key={index} className="text-center bg-card/80">
                 <CardHeader>
@@ -115,8 +126,8 @@ export default function WelcomePage() {
             
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background mb-4 z-10">1</div>
-              <h3 className="text-xl font-headline font-semibold">Describe Your Project</h3>
-              <p className="text-muted-foreground mt-2">Tell the AI what you want to build, from a simple website to a complex application.</p>
+              <h3 className="text-xl font-headline font-semibold">Describe Your Topic</h3>
+              <p className="text-muted-foreground mt-2">Tell the AI what you want to build or what you want to learn.</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background mb-4 z-10">2</div>
@@ -125,7 +136,7 @@ export default function WelcomePage() {
             </div>
             <div className="flex flex-col items-center">
               <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-primary-foreground font-bold text-2xl border-4 border-background mb-4 z-10">3</div>
-              <h3 className="text-xl font-headline font-semibold">Start Building</h3>
+              <h3 className="text-xl font-headline font-semibold">Start Your Journey</h3>
               <p className="text-muted-foreground mt-2">Follow the on-demand instructions and code snippets, learning as you build.</p>
             </div>
           </div>
@@ -142,7 +153,7 @@ export default function WelcomePage() {
             <div className="mt-8">
               <Button asChild size="lg">
                 <Link href="/auth">
-                  Explore Projects <ArrowRight className="ml-2 h-5 w-5" />
+                  Explore Projects & Courses <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>
