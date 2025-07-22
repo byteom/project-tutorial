@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState, useMemo } from "react";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { GenerateTutorialForm } from "@/components/projects/GenerateTutorialForm";
 import { useProjects } from "@/hooks/use-projects";
@@ -10,13 +11,20 @@ import {
   Gift,
   Sparkles,
   Flame,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+
+const PROJECTS_PER_PAGE = 9;
 
 export default function Home() {
   const { projects, addProject, deleteProject, isLoading } = useProjects();
+  const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const tracks = [
     { name: "Web Development", icon: <Flame className="text-orange-500" /> },
@@ -25,7 +33,38 @@ export default function Home() {
     { name: "React & Node.js", icon: <div className="h-4 w-4 rounded-full bg-blue-500" /> },
     { name: "C++", icon: <div className="h-4 w-4 rounded-full bg-cyan-500" /> },
     { name: "Python", icon: <div className="h-4 w-4 rounded-full bg-yellow-400" /> },
-  ]
+  ];
+
+  const difficultyFilters = ["Easy", "Medium", "Hard"];
+
+  const handleFilterToggle = (tag: string) => {
+    setActiveFilters(prev => {
+        const newFilters = prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag];
+        setCurrentPage(1); // Reset to first page when filters change
+        return newFilters;
+    });
+  };
+
+  const clearFilters = () => {
+    setActiveFilters([]);
+    setCurrentPage(1);
+  };
+
+  const filteredProjects = useMemo(() => {
+    if (activeFilters.length === 0) {
+      return projects;
+    }
+    return projects.filter(project =>
+      activeFilters.every(filter => project.tags?.some(tag => tag.toLowerCase() === filter.toLowerCase()))
+    );
+  }, [projects, activeFilters]);
+
+  const totalPages = Math.ceil(filteredProjects.length / PROJECTS_PER_PAGE);
+  const paginatedProjects = filteredProjects.slice(
+    (currentPage - 1) * PROJECTS_PER_PAGE,
+    currentPage * PROJECTS_PER_PAGE
+  );
+
 
   return (
     <div className="flex-1 overflow-auto p-4 md:p-8 space-y-8">
@@ -43,7 +82,7 @@ export default function Home() {
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="font-semibold text-white">Browse <Badge variant="secondary" className="ml-1">133</Badge></span>
+          <span className="font-semibold text-white">Browse <Badge variant="secondary" className="ml-1">{filteredProjects.length}</Badge></span>
           <span>Started Projects</span>
         </div>
       </div>
@@ -52,16 +91,22 @@ export default function Home() {
          <Card className="bg-card/80">
           <CardContent className="p-3 flex flex-wrap items-center gap-2 text-sm">
              <span className="text-muted-foreground mr-2">Track:</span>
-             <Button asChild variant="secondary" size="sm"><Link href="#">All</Link></Button>
-             {tracks.map(track => (
-                <Button key={track.name} asChild variant="ghost" size="sm" className="gap-2">
-                  <Link href="#">
-                    {track.icon}
-                    {track.name}
-                  </Link>
-                </Button>
-             ))}
-             <Button asChild variant="ghost" size="sm"><Link href="#">+6 More</Link></Button>
+             <Button variant={activeFilters.length === 0 ? 'secondary' : 'ghost'} size="sm" onClick={clearFilters}>All</Button>
+             {tracks.map(track => {
+                const tag = track.name === 'React & Node.js' ? 'React' : track.name;
+                return (
+                    <Button 
+                        key={track.name} 
+                        variant={activeFilters.includes(tag) ? 'secondary' : 'ghost'} 
+                        size="sm" 
+                        className="gap-2"
+                        onClick={() => handleFilterToggle(tag)}
+                    >
+                        {track.icon}
+                        {track.name}
+                    </Button>
+                )
+             })}
            </CardContent>
          </Card>
          <Card className="bg-card/80">
@@ -73,13 +118,21 @@ export default function Home() {
                   FREE
                 </Link>
               </Button>
-              <Button asChild variant="secondary" size="sm" className="gap-2">
-                 <Link href="#">
-                    Level
-                    <ChevronDown className="h-4 w-4"/>
-                 </Link>
-              </Button>
-              <Button asChild variant="ghost" size="sm"><Link href="#">Clear</Link></Button>
+              <div className="flex items-center gap-2">
+                {difficultyFilters.map(level => (
+                    <Button 
+                        key={level} 
+                        variant={activeFilters.includes(level) ? 'secondary' : 'ghost'} 
+                        size="sm"
+                        onClick={() => handleFilterToggle(level)}
+                    >
+                        {level}
+                    </Button>
+                ))}
+              </div>
+              {activeFilters.length > 0 && 
+                <Button variant="ghost" size="sm" onClick={clearFilters}>Clear</Button>
+              }
             </CardContent>
          </Card>
       </div>
@@ -99,9 +152,33 @@ export default function Home() {
              ))}
            </div>
         ) : (
-          <ProjectList projects={projects} deleteProject={deleteProject} />
+          <ProjectList projects={paginatedProjects} deleteProject={deleteProject} />
         )}
       </section>
+
+       {totalPages > 1 && (
+        <div className="flex justify-center items-center gap-4">
+            <Button 
+                variant="outline" 
+                onClick={() => setCurrentPage(p => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+            >
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+            </span>
+            <Button 
+                variant="outline" 
+                onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+            >
+                Next
+                <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+        </div>
+      )}
     </div>
   );
 }
