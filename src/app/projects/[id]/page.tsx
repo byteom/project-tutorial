@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import rehypePrism from "rehype-prism-plus";
 import { useProjects } from "@/hooks/use-projects";
 import type { Project, TutorialStep } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -21,6 +23,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ArrowLeft, Lightbulb, Loader2 } from "lucide-react";
+import CodeBlock from "@/components/projects/CodeBlock";
 
 const assistanceFormSchema = z.object({
   userProgress: z.string().min(10, "Please describe the problem in a bit more detail."),
@@ -131,7 +134,12 @@ export default function ProjectPage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="prose dark:prose-invert max-w-none px-4 text-base">
-                        <ReactMarkdown>{step.content}</ReactMarkdown>
+                       <ReactMarkdown
+                            rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
+                            components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
+                        >
+                            {step.content}
+                        </ReactMarkdown>
                     </AccordionContent>
                 </AccordionItem>
                 ))}
