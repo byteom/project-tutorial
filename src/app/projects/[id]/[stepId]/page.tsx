@@ -223,7 +223,7 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField control={form.control} name="userProgress" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>What seems to be the problem?</Formela>
+                                <FormLabel>What seems to be the problem?</FormLabel>
                                 <FormControl><Textarea placeholder="e.g., I'm getting an error when I try to..." {...field} rows={4} /></FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -245,4 +245,3 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
         </Card>
     );
 }
-
