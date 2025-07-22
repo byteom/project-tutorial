@@ -116,6 +116,17 @@ export function UserManagementTable() {
     }
   };
 
+  const handleRevokePro = async (userId: string) => {
+    try {
+        await updateUserSubscription(userId, { status: 'free', plan: 'free_tier_revoked' });
+        toast({ title: "Success", description: "User's Pro access has been revoked." });
+        fetchAllUserData();
+    } catch (error) {
+        console.error("Failed to revoke Pro access:", error);
+        toast({ variant: "destructive", title: "Error", description: "Failed to revoke Pro access." });
+    }
+  }
+
   if (isLoading) {
     return <div className="flex items-center justify-center py-10"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
@@ -168,9 +179,15 @@ export function UserManagementTable() {
                     <DropdownMenuContent>
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => handleGrantPro(user.uid)}>
-                            <Crown className="mr-2"/> Grant Pro Access
-                        </DropdownMenuItem>
+                        {user.subscription?.status === 'pro' ? (
+                            <DropdownMenuItem onClick={() => handleRevokePro(user.uid)}>
+                                <Crown className="mr-2 text-destructive"/> Revoke Pro Access
+                            </DropdownMenuItem>
+                        ) : (
+                            <DropdownMenuItem onClick={() => handleGrantPro(user.uid)}>
+                                <Crown className="mr-2 text-primary"/> Grant Pro Access
+                            </DropdownMenuItem>
+                        )}
                         {user.roles.includes('admin') ? (
                             <DropdownMenuItem onClick={() => handleUpdateRole(user.uid, user.roles, 'user')}>
                                 <UserCheck className="mr-2"/> Make User
