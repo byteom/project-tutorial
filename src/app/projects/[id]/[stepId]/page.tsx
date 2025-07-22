@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -30,6 +30,7 @@ import { useTokenUsage } from "@/hooks/use-token-usage";
 
 export default function ProjectStepPage() {
   const params = useParams();
+  const router = useRouter();
   const { id: projectId, stepId } = params;
   const { projects, updateProject, isLoading: projectsLoading } = useProjects();
   const { toast } = useToast();
@@ -48,13 +49,18 @@ export default function ProjectStepPage() {
         const foundStep = foundProject.steps.find(s => s.id === stepId);
         setStep(foundStep || null);
         if (foundStep && foundStep.subTasks.length > 0) {
-            // Find the active subtask from the *project* state, not component state
-            const currentActiveSubTask = foundStep.subTasks.find(st => st.id === (activeSubTask?.id || foundStep.subTasks[0].id)) || foundStep.subTasks[0];
-            setActiveSubTask(currentActiveSubTask);
+            // Find first uncompleted task, or default to the first task
+            const firstUncompleted = foundStep.subTasks.find(st => !st.completed);
+            const initialSubTask = firstUncompleted || foundStep.subTasks[0];
+            
+            // Only set the active subtask if it's not already set to avoid re-renders
+            if (!activeSubTask || activeSubTask.id !== initialSubTask.id) {
+                setActiveSubTask(initialSubTask);
+            }
         }
       }
     }
-  }, [projectId, stepId, projects, projectsLoading, activeSubTask?.id]);
+  }, [projectId, stepId, projects, projectsLoading, activeSubTask]);
 
   const generateAndSetContent = useCallback(async (subTask: SubTask) => {
     // Critical check to prevent re-generation
@@ -138,6 +144,17 @@ export default function ProjectStepPage() {
   
   const handleSubTaskSelect = (subTask: SubTask) => {
     setActiveSubTask(subTask);
+  };
+
+  const handleNextStep = () => {
+    if (project && nextStep) {
+      const nextStepData = project.steps.find(s => s.id === nextStep.id);
+      if (nextStepData) {
+        const firstIncomplete = nextStepData.subTasks.find(st => !st.completed);
+        setActiveSubTask(firstIncomplete || nextStepData.subTasks[0]);
+        router.push(`/projects/${project.id}/${nextStep.id}`);
+      }
+    }
   };
 
   if (projectsLoading) {
@@ -245,11 +262,9 @@ export default function ProjectStepPage() {
             </div>
             <div>
                 {nextStep && (
-                     <Button asChild>
-                        <Link href={`/projects/${project.id}/${nextStep.id}`}>
-                            Next Step
-                            <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
+                     <Button onClick={handleNextStep}>
+                        Next Step
+                        <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                 )}
                  {!nextStep && project.steps.every(s => s.completed) && (
@@ -441,5 +456,7 @@ function PersonalizedAssistance({ context }: { context: string }) {
     </div>
   );
 }
+
+    
 
     
