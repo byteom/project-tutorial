@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, Lightbulb, Cpu, GraduationCap, BrainCircuit } from 'lucide-react';
+import { ArrowRight, Bot, Lightbulb, Cpu, GraduationCap, BrainCircuit, BookOpen, PenTool, Mic } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -94,10 +94,20 @@ export default function WelcomePage() {
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
             Stop watching tutorials. Start building real-world projects and master new skills with our AI-guided, step-by-step learning paths.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button asChild size="lg">
-              <Link href="/auth">
-                Start Your First Project <ArrowRight className="ml-2 h-5 w-5" />
+              <Link href="/project-practice">
+                <BookOpen className="mr-2 h-5 w-5" /> Explore Projects
+              </Link>
+            </Button>
+             <Button asChild size="lg" variant="secondary">
+              <Link href="/learn">
+                <PenTool className="mr-2 h-5 w-5" /> Start Learning
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/interview-practice">
+                <Mic className="mr-2 h-5 w-5" /> Practice Interviews
               </Link>
             </Button>
           </div>
@@ -173,7 +183,7 @@ export default function WelcomePage() {
             <div className="mt-8">
               <Button asChild size="lg">
                 <Link href="/auth">
-                  Explore Projects & Courses <ArrowRight className="ml-2 h-5 w-5" />
+                  Get Started For Free <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
             </div>

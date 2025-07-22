@@ -66,14 +66,18 @@ export default function AuthPage() {
             </p>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" type="button" onClick={() => handleSocialLogin('google')} disabled={isSubmitting}>
-              <FaGoogle className="mr-2" /> Sign in with Google
-            </Button>
-            <Button variant="outline" type="button" onClick={() => handleSocialLogin('github')} disabled={isSubmitting}>
-              <FaGithub className="mr-2" /> Sign in with GitHub
-            </Button>
+          <div className="space-y-3">
+             <p className="text-sm text-center text-muted-foreground font-semibold">Recommended: One-click sign-in</p>
+             <div className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" type="button" className="flex-1" onClick={() => handleSocialLogin('google')} disabled={isSubmitting}>
+                  <FaGoogle className="mr-2" /> Sign in with Google
+                </Button>
+                <Button variant="outline" type="button" className="flex-1" onClick={() => handleSocialLogin('github')} disabled={isSubmitting}>
+                  <FaGithub className="mr-2" /> Sign in with GitHub
+                </Button>
+            </div>
           </div>
+          
 
           <div className="flex items-center gap-4">
             <Separator className="flex-1" />
@@ -110,7 +114,7 @@ export default function AuthPage() {
           {error && <div className="text-destructive text-sm text-center">{error}</div>}
           <Button type="submit" className="w-full" disabled={isSubmitting || loading}>
             {(isSubmitting || loading) && <Loader2 className="animate-spin" />}
-            {mode === "login" ? "Login" : "Sign Up"}
+            {mode === "login" ? "Login with Email" : "Sign Up with Email"}
           </Button>
           <div className="text-center text-sm mt-2">
             {mode === "login" ? (

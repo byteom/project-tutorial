@@ -1,10 +1,11 @@
 
 import { Metadata } from 'next';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Github, Linkedin, User } from 'lucide-react';
+import { Mail, Github, Linkedin, User, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 export const metadata: Metadata = {
     title: 'Contact Us - PROJECTAI',
@@ -52,6 +53,24 @@ export default function ContactPage() {
                         </Link>
                     </Button>
                 </CardContent>
+                <Separator className="my-6" />
+                <CardHeader className="text-center pt-0">
+                     <CardTitle className="font-headline text-2xl">Contact Support</CardTitle>
+                </CardHeader>
+                 <CardContent className="flex justify-center items-center gap-4">
+                    <Button asChild variant="secondary">
+                        <Link href="mailto:support@certifyo.tech">
+                            <Mail className="mr-2" />
+                            support@certifyo.tech
+                        </Link>
+                    </Button>
+                     <Button asChild variant="secondary">
+                        <Link href="https://wa.me/919855567692" target="_blank" rel="noopener noreferrer">
+                            <MessageCircle className="mr-2" />
+                            WhatsApp
+                        </Link>
+                    </Button>
+                 </CardContent>
             </Card>
         </div>
     );
