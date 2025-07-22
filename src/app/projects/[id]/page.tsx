@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useProjects } from "@/hooks/use-projects";
+import { useAuth } from "@/hooks/use-auth";
 import type { Project } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -14,8 +15,16 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ProjectOutlinePage() {
   const params = useParams();
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { projects, updateProject, isLoading } = useProjects();
   const [project, setProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/auth");
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (!isLoading && projects.length > 0) {
@@ -34,7 +43,7 @@ export default function ProjectOutlinePage() {
     return (completedSubTasks / totalSubTasks) * 100;
   }, [project]);
 
-  if (isLoading) {
+  if (authLoading || isLoading || !projects.length) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
@@ -101,6 +110,7 @@ export default function ProjectOutlinePage() {
                                 subTask={subTask}
                                 projectId={projectId}
                                 stepId={step.id}
+                                updateProject={updateProject}
                             />
                         ))}
                     </div>

@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypePrism from "rehype-prism-plus";
 import { useProjects } from "@/hooks/use-projects";
+import { useAuth } from "@/hooks/use-auth";
 import type { Project, TutorialStep, SubTask } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -31,6 +32,7 @@ import { useTokenUsage } from "@/hooks/use-token-usage";
 export default function ProjectStepPage() {
   const params = useParams();
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { id: projectId, stepId } = params;
   const { projects, updateProject, isLoading: projectsLoading } = useProjects();
   const { toast } = useToast();
@@ -42,7 +44,13 @@ export default function ProjectStepPage() {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
 
   useEffect(() => {
-    if (projects.length > 0) {
+    if (!authLoading && !user) {
+      router.replace("/auth");
+    }
+  }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (!projectsLoading && projects.length > 0) {
       const currentProject = projects.find((p) => p.id === projectId);
       if (currentProject) {
         setProject(currentProject);
@@ -54,7 +62,7 @@ export default function ProjectStepPage() {
         }
       }
     }
-  }, [projectId, stepId, projects]);
+  }, [projectId, stepId, projects, projectsLoading]);
 
   const generateAndSetContent = useCallback(async (subTask: SubTask) => {
     if (!project || !step || subTask.content) {
@@ -144,19 +152,19 @@ export default function ProjectStepPage() {
     }
   };
 
-  if (projectsLoading) {
+  if (authLoading || projectsLoading || !projects.length) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
   if (!project || !step) {
     return (
-        <div className="text-center py-16">
-            <h2 className="text-2xl font-bold">Step not found</h2>
-            <p className="text-muted-foreground mt-2">The tutorial step you are looking for does not exist.</p>
-            <Button asChild className="mt-4">
-                <Link href={`/projects/${projectId}`}>Back to Outline</Link>
-            </Button>
-        </div>
+      <div className="text-center py-16">
+        <h2 className="text-2xl font-bold">Project or step not found</h2>
+        <p className="text-muted-foreground mt-2">The project or step you are looking for does not exist.</p>
+        <Button asChild className="mt-4">
+          <Link href="/project-practice">Go back to projects</Link>
+        </Button>
+      </div>
     );
   }
   
