@@ -54,17 +54,21 @@ export function AppSidebar() {
         <SidebarContent className="p-2">
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton href="/" isActive>
-                        <LayoutDashboard />
-                        Projects
-                    </SidebarMenuButton>
+                    <Link href="/" legacyBehavior passHref>
+                        <SidebarMenuButton as="a" isActive>
+                            <LayoutDashboard />
+                            Projects
+                        </SidebarMenuButton>
+                    </Link>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                    <SidebarMenuButton href="/learn">
-                        <BotMessageSquare />
-                        Learn Anything
-                        <Badge variant="secondary" className="ml-auto">BETA</Badge>
-                    </SidebarMenuButton>
+                     <Link href="/learn" legacyBehavior passHref>
+                        <SidebarMenuButton as="a">
+                            <BotMessageSquare />
+                            Learn Anything
+                            <Badge variant="secondary" className="ml-auto">BETA</Badge>
+                        </SidebarMenuButton>
+                    </Link>
                 </SidebarMenuItem>
             </SidebarMenu>
 
@@ -74,10 +78,12 @@ export function AppSidebar() {
                     <SidebarMenu>
                         {ongoingProjects.map((project) => (
                             <SidebarMenuItem key={project.id}>
-                                <SidebarMenuButton href={`/projects/${project.id}`}>
-                                    <Orbit className="text-green-500"/>
-                                    {project.title}
-                                </SidebarMenuButton>
+                                <Link href={`/projects/${project.id}`} legacyBehavior passHref>
+                                    <SidebarMenuButton as="a">
+                                        <Orbit className="text-green-500"/>
+                                        {project.title}
+                                    </SidebarMenuButton>
+                                </Link>
                             </SidebarMenuItem>
                         ))}
                     </SidebarMenu>
@@ -102,14 +108,14 @@ export function AppSidebar() {
                 <SidebarMenu>
                     {topTracks.map((track) => (
                         <SidebarMenuItem key={track.name}>
-                            <SidebarMenuButton href="#">
+                            <SidebarMenuButton>
                                 {track.icon}
                                 {track.name}
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     ))}
                     <SidebarMenuItem>
-                        <SidebarMenuButton href="#">
+                        <SidebarMenuButton>
                             <ChevronDown />
                             Show All
                         </SidebarMenuButton>
