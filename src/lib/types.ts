@@ -1,4 +1,5 @@
 
+
 export interface SubTask {
     id: string;
     title: string;
@@ -81,3 +82,10 @@ export type InterviewQuestion = {
     company?: string;
     tags?: string[];
 };
+
+export interface UserProfile {
+  uid: string;
+  email: string | null;
+  roles: ('user' | 'admin')[];
+  // Add other profile fields here as needed
+}

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { AppSidebar } from "@/components/layout/AppSidebar";
@@ -15,8 +16,8 @@ export default function AdminLayout({
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  // A simple check for admin role. In a real app, this should be a secure check against a backend.
-  const isAdmin = user && user.email === 'admin@example.com'; 
+  // Check if the user's profile has the 'admin' role.
+  const isAdmin = user?.profile?.roles?.includes('admin') ?? false;
 
   useEffect(() => {
     if (!loading && !user) {

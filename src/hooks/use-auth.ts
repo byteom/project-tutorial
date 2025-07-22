@@ -1,33 +1,57 @@
 
+
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, createContext, useContext } from "react";
 import { auth } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  User,
+  User as FirebaseUser,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import { createUserProfile, getUserProfile } from "@/lib/firestore-users";
+import type { UserProfile } from "@/lib/types";
+
+
+interface AuthContextType {
+    user: (FirebaseUser & { profile: UserProfile | null }) | null;
+    loading: boolean;
+    error: string | null;
+    signIn: (email: string, password: string) => Promise<void>;
+    signUp: (email: string, password: string) => Promise<void>;
+    signOut: () => Promise<void>;
+}
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthContextType['user']>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const fetchUserProfile = async (firebaseUser: FirebaseUser): Promise<AuthContextType['user']> => {
+    let profile = await getUserProfile(firebaseUser.uid);
+    // If no profile exists (e.g., for users created before this system), create one.
+    if (!profile) {
+      profile = await createUserProfile(firebaseUser);
+    }
+    return { ...firebaseUser, profile };
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      if (user) {
-        // Redirect only if they are on the auth page
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userWithProfile = await fetchUserProfile(firebaseUser);
+        setUser(userWithProfile);
         if (window.location.pathname === '/auth') {
           router.replace('/project-practice');
         }
+      } else {
+        setUser(null);
       }
+      setLoading(false);
     });
     return () => unsubscribe();
   }, [router]);
@@ -36,8 +60,9 @@ export function useAuth() {
     setError(null);
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle redirect
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await createUserProfile(userCredential.user);
+      // onAuthStateChanged will handle the rest
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -50,7 +75,7 @@ export function useAuth() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle redirect
+      // onAuthStateChanged will handle the rest
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
