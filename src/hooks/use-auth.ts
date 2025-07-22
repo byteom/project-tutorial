@@ -7,7 +7,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
-  onAuthStateChanged,
+  onIdTokenChanged,
   User as FirebaseUser,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -42,7 +42,7 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
           const userWithProfile = await fetchUserProfile(firebaseUser);
@@ -57,7 +57,9 @@ export function useAuth() {
          setError(err.message);
          setUser(null);
          await firebaseSignOut(auth); // Sign out the user from Firebase auth if their profile is blocked
-         router.replace("/auth"); // Redirect to auth page on error (e.g. blocked user)
+         if (window.location.pathname !== '/auth') {
+            router.replace("/auth"); // Redirect to auth page on error (e.g. blocked user)
+         }
       } finally {
         setLoading(false);
       }
@@ -71,7 +73,7 @@ export function useAuth() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await createUserProfile(userCredential.user);
-      // onAuthStateChanged will handle the rest
+      // onIdTokenChanged will handle the rest
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -84,7 +86,7 @@ export function useAuth() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // onAuthStateChanged will handle the rest
+      // onIdTokenChanged will handle the rest
     } catch (err: any) {
       setError(err.message);
       setLoading(false);
@@ -102,5 +104,5 @@ export function useAuth() {
     }
   }, [router]);
 
-  return { user, loading, error, signUp, signIn, signOut };
+  return { user, loading, error, signIn, signUp, signOut };
 }
