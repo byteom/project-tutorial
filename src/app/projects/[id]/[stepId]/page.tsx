@@ -167,7 +167,7 @@ export default function ProjectStepPage() {
             <h2 className="text-2xl font-bold">Step not found</h2>
             <p className="text-muted-foreground mt-2">The tutorial step you are looking for does not exist.</p>
             <Button asChild className="mt-4">
-                <Link href={`/projects/${projectId}`}>Back to Outline</Link>
+                <Link href={`/projects/${project.id}`}>Back to Outline</Link>
             </Button>
         </div>
     );
@@ -326,11 +326,10 @@ function ChecklistCard({
                               <Checkbox
                                   id={`cb-${subTask.id}`}
                                   checked={subTask.completed}
-                                  onCheckedChange={(e) => {
-                                      // Clicks on checkbox should not propagate to the div
-                                      e.preventDefault(); 
+                                  onCheckedChange={() => onSubTaskToggle(subTask.id)}
+                                  onClick={(e) => {
+                                      // Stop propagation to prevent the parent div's onClick from firing
                                       e.stopPropagation();
-                                      onSubTaskToggle(subTask.id);
                                   }}
                                   aria-label={`Mark sub-task ${subTask.title} as complete`}
                               />
