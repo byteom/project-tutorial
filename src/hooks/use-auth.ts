@@ -50,7 +50,7 @@ export function useAuth() {
         if (firebaseUser) {
           const userWithProfile = await fetchUserProfile(firebaseUser);
           setUser(userWithProfile);
-          if (window.location.pathname === '/auth' || window.location.pathname === '/') {
+          if (window.location.pathname === '/auth') {
             router.replace('/project-practice');
           }
         } else {
