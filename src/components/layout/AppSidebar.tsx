@@ -20,10 +20,50 @@ import { Button } from '../ui/button';
 import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useProjects } from '@/hooks/use-projects';
+import { Input } from '../ui/input';
+import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
+import { useToast } from '@/hooks/use-toast';
 
 export function AppSidebar() {
   const { tokenCount } = useTokenUsage();
   const { projects } = useProjects();
+  const { toast } = useToast();
+
+  // Gemini API Key logic
+  const GEMINI_KEY_STORAGE = 'projectai_gemini_api_key';
+  const [geminiKey, setGeminiKey] = React.useState<string | null>(null);
+  const [inputKey, setInputKey] = React.useState('');
+  const [showPrompt, setShowPrompt] = React.useState(false);
+
+  React.useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(GEMINI_KEY_STORAGE) : null;
+    setGeminiKey(stored);
+    setShowPrompt(!stored);
+    setInputKey(stored || '');
+  }, []);
+
+  const handleSaveKey = () => {
+    if (inputKey.trim().length < 10) {
+      toast({
+        title: 'Invalid Key',
+        description: 'Please paste a valid Gemini API key.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    localStorage.setItem(GEMINI_KEY_STORAGE, inputKey.trim());
+    setGeminiKey(inputKey.trim());
+    setShowPrompt(false);
+    toast({
+      title: 'Gemini API Key Saved',
+      description: 'You can now use the platform.',
+    });
+  };
+
+  const handleUpdateKey = () => {
+    setShowPrompt(true);
+    setInputKey(geminiKey || '');
+  };
 
   const ongoingProjects = projects.filter(p => {
     if (!p.steps) return false;
@@ -53,6 +93,34 @@ export function AppSidebar() {
             </div>
         </SidebarHeader>
         <SidebarContent className="flex flex-col p-2">
+            {showPrompt && (
+              <Alert className="mb-4" variant="destructive">
+                <AlertTitle>{geminiKey ? 'Update your Gemini API Key' : 'Paste your Gemini API Key'}</AlertTitle>
+                <AlertDescription>
+                  <div className="flex flex-col gap-2 mt-2">
+                    <Input
+                      type="text"
+                      placeholder="Enter your Gemini API Key"
+                      value={inputKey}
+                      onChange={e => setInputKey(e.target.value)}
+                      className="text-xs"
+                    />
+                    <Button size="sm" onClick={handleSaveKey}>
+                      {geminiKey ? 'Update Key' : 'Save Key'}
+                    </Button>
+                    <span className="text-xs text-muted-foreground">Use this platform</span>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+            {!showPrompt && geminiKey && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-xs text-muted-foreground truncate max-w-[120px]">Key: {geminiKey.slice(0, 4)}...{geminiKey.slice(-4)}</span>
+                <Button size="sm" variant="outline" className="text-xs px-2 py-1 h-6" onClick={handleUpdateKey}>
+                  Update Key
+                </Button>
+              </div>
+            )}
             <div className="flex-1">
                 <SidebarMenu>
                     <SidebarMenuItem>

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useProjects } from "@/hooks/use-projects";
+import { useAuth } from "@/hooks/use-auth";
 import type { Project } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -17,8 +18,20 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export default function ProjectOutlinePage() {
   const params = useParams();
+<<<<<<< HEAD
   const { projects, isLoading } = useProjects();
+=======
+  const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
+  const { projects, updateProject, isLoading } = useProjects();
+>>>>>>> 88161553f17c129e4ba5ff9097c1d7426a22a48a
   const [project, setProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.replace("/auth");
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (!isLoading && projects.length > 0) {
@@ -37,7 +50,29 @@ export default function ProjectOutlinePage() {
     return (completedSubTasks / totalSubTasks) * 100;
   }, [project]);
 
-  if (isLoading) {
+  useEffect(() => {
+    console.log("[DEBUG] authLoading:", authLoading, "user:", user);
+    console.log("[DEBUG] isLoading:", isLoading, "projects:", projects.map(p => p.id));
+    console.log("[DEBUG] params.id:", params.id);
+    if (project) {
+      console.log("[DEBUG] Found project:", project);
+    } else {
+      console.log("[DEBUG] Project not found in loaded projects.");
+    }
+  }, [authLoading, user, isLoading, projects, params.id, project]);
+
+  if (authLoading || isLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+  if (!user) {
+    if (typeof window !== "undefined") {
+      window.location.replace("/auth");
+    }
+    return null;
+  }
+
+  if (!projects.length) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
@@ -105,6 +140,7 @@ export default function ProjectOutlinePage() {
                             </div>
                         </div>
 
+<<<<<<< HEAD
                         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
                             {step.subTasks.map(subTask => (
                                 <StepOutlineCard 
@@ -134,6 +170,18 @@ export default function ProjectOutlinePage() {
                         ) : (
                             <p className="text-muted-foreground">No skills defined for this project.</p>
                         )}
+=======
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {step.subTasks.map(subTask => (
+                            <StepOutlineCard 
+                                key={subTask.id}
+                                subTask={subTask}
+                                projectId={projectId}
+                                stepId={step.id}
+                                updateProject={updateProject}
+                            />
+                        ))}
+>>>>>>> 88161553f17c129e4ba5ff9097c1d7426a22a48a
                     </div>
                 </CardContent>
             </Card>
