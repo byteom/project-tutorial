@@ -99,6 +99,18 @@ export default function LearnAnythingPage() {
   const handleGenerateLessonContent = useCallback(async (module: LearningModule, lesson: LearningLesson) => {
     if (!activeLearningPath || lesson.content) return;
 
+    // Set lesson content to a loading state marker
+    const updatedPathWithLoading = {
+        ...activeLearningPath,
+        modules: activeLearningPath.modules.map(m => 
+            m.id === module.id ? {
+                ...m,
+                lessons: m.lessons.map(l => l.id === lesson.id ? {...l, content: 'loading...'} : l)
+            } : m
+        )
+    };
+    setActiveLearningPath(updatedPathWithLoading);
+
     try {
         const fullOutline = activeLearningPath.modules.map(m => 
             `## ${m.title}\n${m.lessons.map(l => `- ${l.title}`).join('\n')}`
@@ -136,6 +148,17 @@ export default function LearnAnythingPage() {
             title: "Content Generation Failed",
             description: "There was a problem generating the lesson content. Please try again.",
         });
+        // Revert loading state on error
+         const revertedPath = {
+            ...activeLearningPath,
+            modules: activeLearningPath.modules.map(m => 
+                m.id === module.id ? {
+                    ...m,
+                    lessons: m.lessons.map(l => l.id === lesson.id ? {...l, content: ''} : l)
+                } : m
+            )
+        };
+        setActiveLearningPath(revertedPath);
     }
   }, [activeLearningPath, updateLearningPath, addTokens, toast, operatingSystem]);
   
@@ -250,12 +273,12 @@ export default function LearnAnythingPage() {
                                                 </AccordionTrigger>
                                                 <AccordionContent className="px-4 pb-4">
                                                     <div className="border-t pt-4">
-                                                        {!lesson.content ? (
+                                                        {lesson.content === 'loading...' ? (
                                                             <div className="flex items-center gap-2 text-muted-foreground">
                                                                 <Loader2 className="h-4 w-4 animate-spin" />
                                                                 <p>Generating lesson content...</p>
                                                             </div>
-                                                        ) : (
+                                                        ) : lesson.content ? (
                                                             <div className="prose dark:prose-invert max-w-none">
                                                                 <ReactMarkdown
                                                                     rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
@@ -264,6 +287,8 @@ export default function LearnAnythingPage() {
                                                                     {lesson.content}
                                                                 </ReactMarkdown>
                                                             </div>
+                                                        ) : (
+                                                          <div className="text-muted-foreground text-sm">Click to load lesson content.</div>
                                                         )}
                                                     </div>
                                                 </AccordionContent>
@@ -294,7 +319,7 @@ export default function LearnAnythingPage() {
                       <p className="font-bold">{path.title}</p>
                       <p className="text-sm text-muted-foreground">{path.topic} - {path.difficulty}</p>
                     </button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteLearningPath(path.id)}>
+                    <Button variant="ghost" size="icon" onClick={async (e) => { e.stopPropagation(); await deleteLearningPath(path.id); }}>
                         <Trash2 className="h-4 w-4" />
                     </Button>
                   </CardContent>

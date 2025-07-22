@@ -26,8 +26,10 @@ import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { useUserPreferences, OperatingSystem } from '@/hooks/use-user-preferences';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AppSidebar() {
+  const { user } = useAuth();
   const { tokenCount } = useTokenUsage();
   const { projects } = useProjects();
   const { toast } = useToast();
@@ -88,6 +90,10 @@ export function AppSidebar() {
     { name: "Python", icon: <Code /> },
   ]
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <Sidebar>
         <SidebarHeader>
@@ -139,7 +145,7 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <Link href="/learn">
-                            <SidebarMenuButton isActive={pathname === '/learn'}>
+                            <SidebarMenuButton isActive={pathname.startsWith('/learn')}>
                                 <BotMessageSquare />
                                 Learn Anything
                                 <Badge variant="secondary" className="ml-auto">BETA</Badge>
@@ -222,15 +228,17 @@ export function AppSidebar() {
             </div>
         </SidebarContent>
         <SidebarFooter className="p-2">
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary">
-                 <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                    <AvatarFallback>OS</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                    <p className="text-sm font-semibold">Om singh</p>
+            <Link href="/profile" className="w-full">
+                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`} alt="User Avatar" />
+                        <AvatarFallback>{user.email?.[0].toUpperCase() ?? 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 overflow-hidden">
+                        <p className="text-sm font-semibold truncate">{user.email}</p>
+                    </div>
                 </div>
-            </div>
+            </Link>
              <p className='text-xs text-center text-muted-foreground pt-4'>
                 Made with ❤️ by certifyo-omsingh
             </p>
