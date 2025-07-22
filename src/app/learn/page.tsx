@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -14,12 +14,13 @@ import { Bot, Loader2, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTokenUsage } from "@/hooks/use-token-usage";
 import { generateLearningPath } from "@/ai/flows/generate-learning-path";
+import { generateLessonContent } from "@/ai/flows/generate-lesson-content";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypePrism from "rehype-prism-plus";
 import CodeBlock from "@/components/projects/CodeBlock";
-import type { LearningPath } from "@/lib/types";
+import type { LearningPath, LearningModule, LearningLesson } from "@/lib/types";
 import { useLearningPaths } from "@/hooks/use-learning-paths";
 
 const formSchema = z.object({
@@ -35,7 +36,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function LearnAnythingPage() {
   const [isGenerating, setIsGenerating] = useState(false);
-  const { learningPaths, addLearningPath, deleteLearningPath, isLoading: isLoadingPaths } = useLearningPaths();
+  const { learningPaths, addLearningPath, deleteLearningPath, updateLearningPath, isLoading: isLoadingPaths } = useLearningPaths();
   const [activeLearningPath, setActiveLearningPath] = useState<LearningPath | null>(null);
 
   const { toast } = useToast();
@@ -59,8 +60,16 @@ export default function LearnAnythingPage() {
         addTokens(result.tokensUsed);
       }
       
-      await addLearningPath(result);
-      setActiveLearningPath(result);
+      const newPath: LearningPath = {
+        ...result,
+        modules: result.modules.map(module => ({
+          ...module,
+          lessons: module.lessons.map(lesson => ({...lesson, content: ''}))
+        }))
+      };
+
+      await addLearningPath(newPath);
+      setActiveLearningPath(newPath);
 
       toast({
         title: "Learning Path Generated!",
@@ -83,6 +92,48 @@ export default function LearnAnythingPage() {
   const handleSelectPath = (path: LearningPath) => {
     setActiveLearningPath(path);
   }
+
+  const handleGenerateLessonContent = useCallback(async (module: LearningModule, lesson: LearningLesson) => {
+    if (!activeLearningPath || lesson.content) return;
+
+    try {
+        const fullOutline = activeLearningPath.modules.map(m => 
+            `## ${m.title}\n${m.lessons.map(l => `- ${l.title}`).join('\n')}`
+          ).join('\n\n');
+
+        const result = await generateLessonContent({
+            pathTitle: activeLearningPath.title,
+            moduleTitle: module.title,
+            lessonTitle: lesson.title,
+            fullOutline: fullOutline,
+        });
+
+        if (result.tokensUsed) {
+            addTokens(result.tokensUsed);
+        }
+
+        const updatedPath = {
+            ...activeLearningPath,
+            modules: activeLearningPath.modules.map(m => 
+                m.id === module.id ? {
+                    ...m,
+                    lessons: m.lessons.map(l => l.id === lesson.id ? {...l, content: result.content} : l)
+                } : m
+            )
+        };
+        
+        await updateLearningPath(updatedPath);
+        setActiveLearningPath(updatedPath);
+
+    } catch (error) {
+        console.error("Failed to generate lesson content:", error);
+        toast({
+            variant: "destructive",
+            title: "Content Generation Failed",
+            description: "There was a problem generating the lesson content. Please try again.",
+        });
+    }
+  }, [activeLearningPath, updateLearningPath, addTokens, toast]);
   
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4">
@@ -172,8 +223,8 @@ export default function LearnAnythingPage() {
             </header>
 
             <Accordion type="single" collapsible className="w-full space-y-4">
-                {activeLearningPath.modules.map((module, index) => (
-                    <AccordionItem key={module.id} value={`item-${index}`} className="border-b-0">
+                {activeLearningPath.modules.map((module, moduleIndex) => (
+                    <AccordionItem key={module.id} value={`module-${moduleIndex}`} className="border-b-0">
                         <Card className="bg-card/80">
                             <AccordionTrigger className="p-6 text-left hover:no-underline">
                                 <div className="flex-1">
@@ -182,20 +233,40 @@ export default function LearnAnythingPage() {
                                 </div>
                             </AccordionTrigger>
                             <AccordionContent className="px-6 pb-6">
-                                <div className="border-t pt-4 space-y-6">
-                                    {module.lessons.map(lesson => (
-                                        <div key={lesson.id}>
-                                            <h4 className="font-headline text-xl text-primary">{lesson.title}</h4>
-                                            <div className="prose dark:prose-invert max-w-none mt-2">
-                                                <ReactMarkdown
-                                                    rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
-                                                    components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
+                                <div className="border-t pt-4 space-y-2">
+                                <Accordion type="single" collapsible className="w-full space-y-2">
+                                    {module.lessons.map((lesson, lessonIndex) => (
+                                        <AccordionItem key={lesson.id} value={`lesson-${lessonIndex}`} className="border-b-0">
+                                            <Card className="bg-secondary/50">
+                                                <AccordionTrigger
+                                                    className="p-4 text-left hover:no-underline"
+                                                    onClick={() => handleGenerateLessonContent(module, lesson)}
                                                 >
-                                                    {lesson.content}
-                                                </ReactMarkdown>
-                                            </div>
-                                        </div>
+                                                     <h4 className="font-headline text-lg text-primary">{lesson.title}</h4>
+                                                </AccordionTrigger>
+                                                <AccordionContent className="px-4 pb-4">
+                                                    <div className="border-t pt-4">
+                                                        {!lesson.content ? (
+                                                            <div className="flex items-center gap-2 text-muted-foreground">
+                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                                <p>Generating lesson content...</p>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="prose dark:prose-invert max-w-none">
+                                                                <ReactMarkdown
+                                                                    rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
+                                                                    components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
+                                                                >
+                                                                    {lesson.content}
+                                                                </ReactMarkdown>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </AccordionContent>
+                                            </Card>
+                                        </AccordionItem>
                                     ))}
+                                </Accordion>
                                 </div>
                             </AccordionContent>
                         </Card>

@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 import {
   getUserLearningPaths,
   addUserLearningPath,
+  updateUserLearningPath,
   deleteUserLearningPath,
 } from "@/lib/firestore-learning-paths";
 
@@ -42,6 +43,17 @@ export function useLearningPaths() {
     },
     [user]
   );
+  
+  const updateLearningPath = useCallback(
+    async (updatedLearningPath: LearningPath) => {
+      if (!user) return;
+      await updateUserLearningPath(user.uid, updatedLearningPath);
+      setLearningPaths((prev) =>
+        prev.map((p) => (p.id === updatedLearningPath.id ? updatedLearningPath : p))
+      );
+    },
+    [user]
+  );
 
   const deleteLearningPath = useCallback(
     async (learningPathId: string) => {
@@ -52,5 +64,5 @@ export function useLearningPaths() {
     [user]
   );
 
-  return { learningPaths, addLearningPath, deleteLearningPath, isLoading };
+  return { learningPaths, addLearningPath, updateLearningPath, deleteLearningPath, isLoading };
 }

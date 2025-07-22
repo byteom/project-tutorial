@@ -1,0 +1,78 @@
+
+'use server';
+
+/**
+ * @fileOverview A flow to generate the detailed content for a single lesson in a learning path.
+ *
+ * - generateLessonContent - A function that handles content generation for a specific lesson.
+ * - GenerateLessonContentInput - The input type for the function.
+ * - GenerateLessonContentOutput - The return type for the function.
+ */
+
+import { ai } from '@/ai/genkit';
+import { z } from 'zod';
+
+const GenerateLessonContentInputSchema = z.object({
+  pathTitle: z.string().describe('The main title of the overall learning path.'),
+  moduleTitle: z.string().describe('The title of the current module.'),
+  lessonTitle: z.string().describe('The title of the specific lesson to generate content for.'),
+  fullOutline: z.string().describe('The full outline of the entire learning path for context.'),
+});
+export type GenerateLessonContentInput = z.infer<typeof GenerateLessonContentInputSchema>;
+
+const GenerateLessonContentOutputSchema = z.object({
+  content: z.string().describe('The detailed, well-structured Markdown content for the lesson. All code snippets must be in fenced code blocks with language identifiers.'),
+  tokensUsed: z.number().optional().describe('The number of tokens used to generate the content.'),
+});
+export type GenerateLessonContentOutput = z.infer<typeof GenerateLessonContentOutputSchema>;
+
+
+export async function generateLessonContent(
+  input: GenerateLessonContentInput
+): Promise<GenerateLessonContentOutput> {
+  return generateLessonContentFlow(input);
+}
+
+const prompt = ai.definePrompt({
+  name: 'generateLessonContentPrompt',
+  input: { schema: GenerateLessonContentInputSchema },
+  output: { schema: GenerateLessonContentOutputSchema },
+  prompt: `You are an expert technical writer creating content for a learning path.
+Your task is to generate the detailed content for a single lesson within a larger curriculum.
+
+**Learning Path Context:**
+- **Path Title:** {{{pathTitle}}}
+- **Full Path Outline:**
+{{{fullOutline}}}
+
+**Current Lesson:**
+- **Module:** {{{moduleTitle}}}
+- **Lesson:** {{{lessonTitle}}}
+
+**Instructions:**
+1.  Generate comprehensive, easy-to-follow content for the specified lesson.
+2.  Provide clear explanations of the concepts involved.
+3.  Include all necessary code snippets for this lesson.
+4.  **CRITICAL:** All code snippets must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash).
+5.  Format the response using Markdown for headings, lists, and inline code.
+6.  Focus ONLY on the current lesson. Do not include content from other lessons.
+`,
+});
+
+const generateLessonContentFlow = ai.defineFlow(
+  {
+    name: 'generateLessonContentFlow',
+    inputSchema: GenerateLessonContentInputSchema,
+    outputSchema: GenerateLessonContentOutputSchema,
+  },
+  async (input) => {
+    const result = await prompt(input);
+    const usage = result.usage;
+    const tokensUsed = (usage?.inputTokens || 0) + (usage?.outputTokens || 0);
+
+    return {
+      content: result.output!.content,
+      tokensUsed: tokensUsed,
+    };
+  }
+);

@@ -30,7 +30,7 @@ export interface LearningLesson {
   id: string;
   title: string;
   description: string;
-  content: string;
+  content?: string; // Content is now optional and will be loaded on demand
 }
 
 export interface LearningModule {

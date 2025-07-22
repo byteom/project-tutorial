@@ -4,6 +4,7 @@ import {
   doc,
   getDocs,
   setDoc,
+  updateDoc,
   deleteDoc,
   query,
   where,
@@ -18,6 +19,10 @@ export async function getUserLearningPaths(userId: string): Promise<LearningPath
 
 export async function addUserLearningPath(userId: string, learningPath: LearningPath) {
   await setDoc(doc(db, "learningPaths", learningPath.id), { ...learningPath, userId });
+}
+
+export async function updateUserLearningPath(userId: string, learningPath: LearningPath) {
+    await updateDoc(doc(db, "learningPaths", learningPath.id), { ...learningPath, userId });
 }
 
 export async function deleteUserLearningPath(userId: string, learningPathId: string) {

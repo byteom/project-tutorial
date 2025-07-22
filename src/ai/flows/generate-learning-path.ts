@@ -22,7 +22,6 @@ const LearningLessonSchema = z.object({
   id: z.string().describe("A unique ID for the lesson (e.g., 'lesson-1-1')."),
   title: z.string().describe('The title of the lesson.'),
   description: z.string().describe('A short, one-sentence description of what this lesson covers.'),
-  content: z.string().describe('The detailed, well-structured Markdown content for the lesson. All code snippets must be in fenced code blocks with language identifiers.'),
 });
 
 const LearningModuleSchema = z.object({
@@ -55,7 +54,8 @@ const prompt = ai.definePrompt({
   input: { schema: GenerateLearningPathInputSchema },
   output: { schema: GenerateLearningPathOutputSchema },
   prompt: `You are an expert curriculum designer creating a learning path for a given topic.
-Your task is to generate a complete, well-structured learning path with modules and detailed lessons.
+Your task is to generate a well-structured learning path outline with modules and lessons.
+**IMPORTANT**: Do NOT generate the actual lesson content. Only generate the titles and descriptions for the modules and lessons.
 
 **Topic:** {{{topic}}}
 **Difficulty Level:** {{{difficulty}}}
@@ -63,13 +63,11 @@ Your task is to generate a complete, well-structured learning path with modules 
 **Instructions:**
 1.  **ID**: Generate a unique ID for this learning path. It should be a slug-style string based on the topic and difficulty, like 'learn-react-basics-easy'.
 2.  **Structure:** Create a series of modules. Each module should represent a major unit of study.
-3.  **Lessons:** Within each module, create several detailed lessons. Each lesson must have a title, a short description, and the full Markdown content for that lesson.
-4.  **Content:** The content for each lesson should be comprehensive. Include clear explanations, examples, and all necessary code snippets. **CRITICAL:** All code must be in fenced code blocks with language identifiers.
-5.  **Difficulty:** The depth and complexity of the modules and lessons should directly correspond to the requested difficulty level.
+3.  **Lessons:** Within each module, create several lessons. Each lesson must have a title and a short description.
+4.  **Difficulty:** The depth and complexity of the modules and lessons should directly correspond to the requested difficulty level.
     *   **Easy:** Focus on fundamental concepts, simple examples, and getting started.
     *   **Medium:** Introduce more intermediate concepts, more complex examples, and best practices.
     *   **Hard:** Cover advanced topics, complex use cases, performance considerations, and in-depth theory.
-6.  **Be Exhaustive:** Do not skip details. Provide complete, ready-to-use content for every single lesson. You are generating the entire course at once.
 `,
 });
 
