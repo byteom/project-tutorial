@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut, Crown } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut, Crown, BrainCircuit } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useProjects } from '@/hooks/use-projects';
 import { Input } from '../ui/input';
@@ -140,6 +140,15 @@ export function AppSidebar() {
                                 <BotMessageSquare />
                                 Learn Anything
                                 <Badge variant="secondary" className="ml-auto">BETA</Badge>
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <Link href="/interview-practice">
+                            <SidebarMenuButton isActive={pathname.startsWith('/interview-practice')}>
+                                <BrainCircuit />
+                                Interview Practice
+                                 <Badge variant="secondary" className="ml-auto">NEW</Badge>
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>

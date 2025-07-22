@@ -6,3 +6,4 @@ import '@/ai/flows/personalized-assistance.ts';
 import '@/ai/flows/generate-step-content.ts';
 import '@/ai/flows/generate-learning-path.ts';
 import '@/ai/flows/generate-lesson-content.ts';
+import '@/ai/flows/generate-interview-feedback.ts';
