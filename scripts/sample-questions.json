@@ -1,0 +1,38 @@
+
+[
+  {
+    "question": "What are the differences between a `service` and a `factory` in AngularJS?",
+    "category": "Technical",
+    "type": "Frontend",
+    "difficulty": "Medium",
+    "tags": ["AngularJS", "JavaScript"]
+  },
+  {
+    "question": "Tell me about a time you had to deliver a project under a tight deadline.",
+    "category": "Behavioral",
+    "type": "General",
+    "difficulty": "Easy"
+  },
+  {
+    "question": "Explain the concept of containerization and its benefits, using Docker as an example.",
+    "category": "Technical",
+    "type": "DevOps",
+    "difficulty": "Medium",
+    "tags": ["Docker", "DevOps", "Containers"]
+  },
+  {
+    "question": "How do you handle state management in a large-scale React application?",
+    "category": "Technical",
+    "type": "Frontend",
+    "difficulty": "Hard",
+    "company": "Meta",
+    "tags": ["React", "State Management", "Redux", "Zustand"]
+  },
+  {
+    "question": "Describe the CAP theorem and how it applies to distributed database design.",
+    "category": "Technical",
+    "type": "Backend",
+    "difficulty": "Hard",
+    "tags": ["System Design", "Databases", "Distributed Systems"]
+  }
+]

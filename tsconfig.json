@@ -23,6 +23,6 @@
     },
     "types": ["node", "@types/react", "@types/react-dom", "@types/recharts"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "scripts/bulk-load-questions.ts"],
   "exclude": ["node_modules"]
 }
