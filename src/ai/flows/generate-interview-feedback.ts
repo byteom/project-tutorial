@@ -18,9 +18,21 @@ const GenerateInterviewFeedbackInputSchema = z.object({
 });
 export type GenerateInterviewFeedbackInput = z.infer<typeof GenerateInterviewFeedbackInputSchema>;
 
+const AnalysisCriteriaSchema = z.object({
+  rating: z.string().describe("The rating for this criterion (e.g., 'Below Average', 'Average', 'Good', 'Excellent')."),
+  reason: z.string().describe("A brief, one-sentence justification for the rating."),
+});
+
 const GenerateInterviewFeedbackOutputSchema = z.object({
   feedback: z.string().describe('Detailed, constructive feedback on the user\'s answer, formatted in Markdown. It should analyze the answer\'s structure, clarity, and content, and provide specific suggestions for improvement.'),
   score: z.number().min(0).max(100).describe('A score from 0 to 100 representing the quality of the answer.'),
+  analysis: z.object({
+    responseQuality: AnalysisCriteriaSchema,
+    clarity: AnalysisCriteriaSchema,
+    criticalThinking: AnalysisCriteriaSchema,
+    relevance: AnalysisCriteriaSchema,
+    thoroughness: AnalysisCriteriaSchema,
+  }).describe('A detailed analysis of the user\'s answer across multiple criteria.'),
   tokensUsed: z.number().optional().describe('The number of tokens used to generate the feedback.'),
 });
 export type GenerateInterviewFeedbackOutput = z.infer<typeof GenerateInterviewFeedbackOutputSchema>;
@@ -50,16 +62,18 @@ const prompt = ai.definePrompt({
 
 **Instructions:**
 1.  **Analyze the Answer:** Carefully evaluate the user's answer based on the following criteria:
-    *   **Clarity and Structure:** Is the answer well-organized and easy to follow? Does it use a clear structure (like the STAR method for behavioral questions)?
-    *   **Relevance:** Does the answer directly address the question?
-    *   **Completeness:** Does the answer provide sufficient detail and examples?
-    *   **Impact:** Does the answer effectively demonstrate the user's skills and accomplishments?
-2.  **Provide Constructive Feedback:** Write detailed feedback in Markdown format. The feedback should be encouraging and actionable.
+    *   **Response Quality:** Overall effectiveness and correctness of the response.
+    *   **Clarity:** Is the answer well-organized and easy to follow?
+    *   **Critical Thinking:** Does the answer demonstrate analytical skills and problem-solving?
+    *   **Relevance:** Does the answer directly address the question asked?
+    *   **Thoroughness:** Does the answer provide sufficient detail and examples?
+2.  **Provide Structured Analysis:** For each of the criteria above, provide a rating ('Below Average', 'Average', 'Good', 'Excellent') and a brief, one-sentence reason for that rating.
+3.  **Provide Detailed Feedback:** Write comprehensive feedback in Markdown format. The feedback should be encouraging and actionable.
     *   Start with a positive point.
     *   Identify specific areas for improvement.
     *   Provide concrete examples of how the user could rephrase or restructure parts of their answer.
     *   Offer a revised, improved version of the answer as an example.
-3.  **Assign a Score:** Give a score from 0 to 100 that reflects the overall quality of the user's answer.
+4.  **Assign a Score:** Give a score from 0 to 100 that reflects the overall quality of the user's answer. This score should be consistent with your analysis ratings.
 `,
 });
 

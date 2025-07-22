@@ -7,7 +7,7 @@ import { interviewQuestions } from '@/lib/interview-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Star } from 'lucide-react';
+import { Loader2, Sparkles, Wand2 } from 'lucide-react';
 import { z } from 'zod';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +16,8 @@ import { generateInterviewFeedback, GenerateInterviewFeedbackOutput } from '@/ai
 import { useToast } from '@/hooks/use-toast';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import ReactMarkdown from 'react-markdown';
-import { Progress } from '@/components/ui/progress';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { BellCurveChart } from '@/components/charts/BellCurveChart';
 
 const formSchema = z.object({
     answer: z.string().min(50, {
@@ -32,6 +33,7 @@ export default function QuestionPracticePage() {
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [feedback, setFeedback] = useState<GenerateInterviewFeedbackOutput | null>(null);
+    const [lastAnswer, setLastAnswer] = useState('');
     const { toast } = useToast();
     const { addTokens } = useTokenUsage();
 
@@ -46,6 +48,7 @@ export default function QuestionPracticePage() {
         if (!question) return;
         setIsGenerating(true);
         setFeedback(null);
+        setLastAnswer(data.answer);
         try {
             const result = await generateInterviewFeedback({
                 question: question.question,
@@ -123,28 +126,69 @@ export default function QuestionPracticePage() {
             {isGenerating && (
                 <div className="text-center mt-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                    <p className="text-muted-foreground mt-4">Analyzing your answer...</p>
+                    <p className="text-muted-foreground mt-4">Analyzing your answer... this might take a moment.</p>
                 </div>
             )}
 
             {feedback && (
-                <Card className="mt-8">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-2xl">AI Feedback</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div>
-                            <h3 className="font-semibold mb-2">Overall Score</h3>
-                            <div className="flex items-center gap-4">
-                                <Progress value={feedback.score} className="h-3" />
-                                <span className="font-bold text-lg text-primary">{feedback.score}/100</span>
+                <div className="mt-8 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="font-headline text-2xl">How you did:</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                {Object.entries(feedback.analysis).map(([key, value]) => (
+                                    <div key={key} className="flex justify-between items-center text-sm">
+                                        <p className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                                        <p className="text-red-400">{value.rating}</p>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                        <Card>
+                             <CardHeader>
+                                <CardTitle className="font-headline text-2xl">How you compare:</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <BellCurveChart score={feedback.score} />
+                            </CardContent>
+                        </Card>
+                    </div>
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-center">
+                                <CardTitle className="font-headline text-2xl flex items-center gap-2">
+                                    <Wand2 />
+                                    Feedback
+                                </CardTitle>
+                                <TooltipProvider>
+                                    <div className="flex gap-2">
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="outline" size="sm">Original question</Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                                <p>{question.question}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                         <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button variant="outline" size="sm">Response</Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                                 <p>{lastAnswer}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </div>
+                                </TooltipProvider>
                             </div>
-                        </div>
-                        <div className="prose dark:prose-invert max-w-none">
-                            <ReactMarkdown>{feedback.feedback}</ReactMarkdown>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardHeader>
+                        <CardContent className="prose dark:prose-invert max-w-none">
+                             <ReactMarkdown>{feedback.feedback}</ReactMarkdown>
+                        </CardContent>
+                    </Card>
+                </div>
             )}
         </div>
     );
