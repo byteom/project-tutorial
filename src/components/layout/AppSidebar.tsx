@@ -26,9 +26,9 @@ export function AppSidebar() {
   const { projects } = useProjects();
 
   const ongoingProjects = projects.filter(p => {
-    const allSubTasks = p.steps.flatMap(s => s.subTasks);
+    const allSubTasks = p.steps.flatMap(s => s.subTasks || []);
     if (allSubTasks.length === 0) return false;
-    const completedCount = allSubTasks.filter(st => st.completed).length;
+    const completedCount = allSubTasks.filter(st => st && st.completed).length;
     return completedCount > 0 && completedCount < allSubTasks.length;
   });
 
