@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, Lightbulb, ListChecks, Cpu, GraduationCap } from 'lucide-react';
+import { ArrowRight, Bot, Lightbulb, ListChecks, Cpu, GraduationCap, BrainCircuit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function WelcomePage() {
@@ -17,9 +17,9 @@ export default function WelcomePage() {
       description: 'Want to learn a new skill? Our AI can generate a personalized, step-by-step curriculum on any topic for you.',
     },
     {
-      icon: <ListChecks className="h-8 w-8 text-primary" />,
-      title: 'Structured Learning Paths',
-      description: 'All tutorials and curriculums are broken down into logical steps and granular sub-tasks, providing a clear path to mastery.',
+      icon: <BrainCircuit className="h-8 w-8 text-primary" />,
+      title: 'AI-Powered Interview Practice',
+      description: 'Practice real interview questions and get instant, AI-powered feedback on your answers and delivery.',
     },
     {
       icon: <Lightbulb className="h-8 w-8 text-primary" />,
@@ -52,10 +52,16 @@ export default function WelcomePage() {
                   Learn
                 </Link>
                 <Link
+                  href="/interview-practice"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Interview Prep
+                </Link>
+                <Link
                   href="/contact"
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
                 >
-                  Contact Us
+                  Contact
                 </Link>
                  <Link
                   href="/auth"
@@ -88,7 +94,7 @@ export default function WelcomePage() {
       <section className="py-16 bg-secondary/30">
         <div className="container px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold font-headline">Why ProjectForgeAI?</h2>
+            <h2 className="text-4xl font-bold font-headline">Why PROJECTAI?</h2>
             <p className="text-muted-foreground mt-2">The best way to learn is by doing. Here's how we help.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
