@@ -47,14 +47,17 @@ export default function ProjectStepPage() {
       if (foundProject) {
         const foundStep = foundProject.steps.find(s => s.id === stepId);
         setStep(foundStep || null);
-        if (foundStep && foundStep.subTasks.length > 0 && !activeSubTask) {
-            setActiveSubTask(foundStep.subTasks[0]);
+        if (foundStep && foundStep.subTasks.length > 0) {
+            // Find the active subtask from the *project* state, not component state
+            const currentActiveSubTask = foundStep.subTasks.find(st => st.id === (activeSubTask?.id || foundStep.subTasks[0].id)) || foundStep.subTasks[0];
+            setActiveSubTask(currentActiveSubTask);
         }
       }
     }
-  }, [projectId, stepId, projects, projectsLoading, activeSubTask]);
+  }, [projectId, stepId, projects, projectsLoading, activeSubTask?.id]);
 
   const generateAndSetContent = useCallback(async (subTask: SubTask) => {
+    // Critical check to prevent re-generation
     if (!project || !step || subTask.content) {
       return;
     }
@@ -89,7 +92,8 @@ export default function ProjectStepPage() {
           )
       };
 
-      updateProject(updatedProject);
+      // This call saves the new content to local storage via the useProjects hook
+      updateProject(updatedProject); 
       setActiveSubTask(updatedSubTask);
 
     } catch (error) {
@@ -106,10 +110,10 @@ export default function ProjectStepPage() {
 
 
   useEffect(() => {
-    if (activeSubTask && !activeSubTask.content) {
+    if (activeSubTask && !activeSubTask.content && !isGeneratingContent) {
       generateAndSetContent(activeSubTask);
     }
-  }, [activeSubTask, generateAndSetContent]);
+  }, [activeSubTask, generateAndSetContent, isGeneratingContent]);
 
 
   const handleSubTaskToggle = (subTaskId: string) => {
@@ -180,7 +184,7 @@ export default function ProjectStepPage() {
               <TabsContent value="instructions">
                 <Card className="bg-card/50 mt-4">
                     <CardContent className="p-8">
-                        {isGeneratingContent && !activeSubTask?.content && (
+                        {(isGeneratingContent && !activeSubTask?.content) && (
                             <div className="flex items-center gap-3 text-muted-foreground">
                                 <Loader2 className="h-5 w-5 animate-spin" />
                                 <p>Generating content for {activeSubTask?.title}...</p>
@@ -437,3 +441,5 @@ function PersonalizedAssistance({ context }: { context: string }) {
     </div>
   );
 }
+
+    
