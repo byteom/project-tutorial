@@ -10,14 +10,14 @@ import { useLearningPaths } from '@/hooks/use-learning-paths';
 import { useProjects } from '@/hooks/use-projects';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useUserPreferences, type OperatingSystem } from '@/hooks/use-user-preferences';
-import { BookOpen, Flame, Laptop, LogOut, ToyBrick, User as UserIcon } from 'lucide-react';
+import { BookOpen, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon } from 'lucide-react';
 
 export default function ProfilePage() {
     const { user, signOut } = useAuth();
     const { projects } = useProjects();
     const { learningPaths } = useLearningPaths();
     const { tokenCount } = useTokenUsage();
-    const { operatingSystem, setOS } = useUserPreferences();
+    const { operatingSystem, setOS, isLoading: isLoadingPreferences } = useUserPreferences();
 
     if (!user) {
         return null;
@@ -98,16 +98,23 @@ export default function ProfilePage() {
                         <CardContent>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Operating System</label>
-                                <Select onValueChange={(value) => setOS(value as OperatingSystem)} value={operatingSystem}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select OS" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="Windows">Windows</SelectItem>
-                                        <SelectItem value="macOS">macOS</SelectItem>
-                                        <SelectItem value="Linux">Linux</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                {isLoadingPreferences ? (
+                                    <div className="flex items-center gap-2">
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        <span>Loading OS preference...</span>
+                                    </div>
+                                ) : (
+                                    <Select onValueChange={(value) => setOS(value as OperatingSystem)} value={operatingSystem}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select OS" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Windows">Windows</SelectItem>
+                                            <SelectItem value="macOS">macOS</SelectItem>
+                                            <SelectItem value="Linux">Linux</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                )}
                                 <p className="text-xs text-muted-foreground">
                                     This helps us tailor generated code and commands for you.
                                 </p>
