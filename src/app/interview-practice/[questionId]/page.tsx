@@ -14,7 +14,7 @@ import ReactMarkdown from 'react-markdown';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BellCurveChart } from '@/components/charts/BellCurveChart';
 import { useAuth } from '@/hooks/use-auth';
-import { addInterviewAnswer } from '@/lib/firestore-interview-answers';
+import { addOrUpdateInterviewAnswer } from '@/lib/firestore-interview-answers';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -78,8 +78,7 @@ export default function QuestionPracticePage() {
 
             setFeedback(result);
 
-            await addInterviewAnswer(user!.uid, {
-                id: `${user!.uid}-${question!.id}-${Date.now()}`,
+            await addOrUpdateInterviewAnswer(user!.uid, {
                 questionId: question!.id,
                 question: question!.question,
                 answer: result.transcript,
