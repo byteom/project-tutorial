@@ -21,7 +21,7 @@ import { getPersonalizedAssistance } from "@/ai/flows/personalized-assistance";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Lightbulb, Loader2, CheckCircle, Circle, Bot } from "lucide-react";
+import { ArrowLeft, Lightbulb, Loader2, CheckCircle, Circle, Bot, ArrowRight } from "lucide-react";
 import CodeBlock from "@/components/projects/CodeBlock";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +93,8 @@ export default function ProjectStepPage() {
   }
   
   const stepIndex = project.steps.findIndex(s => s.id === step.id);
+  const prevStep = stepIndex > 0 ? project.steps[stepIndex - 1] : null;
+  const nextStep = stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null;
   const allSubTasksCompleted = step.subTasks.every(st => st.completed);
 
   return (
@@ -109,7 +111,7 @@ export default function ProjectStepPage() {
         <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
                 <Circle className="h-4 w-4 text-primary/80" />
-                <span>Step {stepIndex + 1}</span>
+                <span>Step {stepIndex + 1} of {project.steps.length}</span>
             </div>
              <div className="flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-primary/80" />
@@ -167,6 +169,36 @@ export default function ProjectStepPage() {
              <PersonalizedAssistance currentStep={step} />
         </TabsContent>
       </Tabs>
+      <footer className="mt-12 border-t pt-6 flex justify-between items-center">
+            <div>
+                {prevStep && (
+                    <Button asChild variant="outline">
+                        <Link href={`/projects/${project.id}/${prevStep.id}`}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Previous Step
+                        </Link>
+                    </Button>
+                )}
+            </div>
+            <div>
+                {nextStep && (
+                     <Button asChild>
+                        <Link href={`/projects/${project.id}/${nextStep.id}`}>
+                            Next Step
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                )}
+                 {!nextStep && project.steps.every(s => s.completed) && (
+                     <Button asChild variant="secondary" className="bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20">
+                        <Link href={`/`}>
+                            <CheckCircle className="mr-2 h-4 w-4" />
+                            Project Complete!
+                        </Link>
+                    </Button>
+                )}
+            </div>
+        </footer>
     </div>
   );
 }
