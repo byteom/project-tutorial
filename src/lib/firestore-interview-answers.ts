@@ -13,7 +13,7 @@ import type { InterviewAnswer } from "./types";
 
 export async function getUserInterviewAnswers(userId: string): Promise<InterviewAnswer[]> {
   const q = query(
-    collection(db, "interviewAnswers"), 
+    collection(db, "interviewAnswers"),
     where("userId", "==", userId),
     orderBy("createdAt", "desc")
   );
