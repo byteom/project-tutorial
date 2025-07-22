@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function Home() {
   const { projects, addProject, deleteProject, isLoading } = useProjects();
@@ -51,28 +52,34 @@ export default function Home() {
          <Card className="bg-card/80">
           <CardContent className="p-3 flex flex-wrap items-center gap-2 text-sm">
              <span className="text-muted-foreground mr-2">Track:</span>
-             <Button variant="secondary" size="sm">All</Button>
+             <Button asChild variant="secondary" size="sm"><Link href="#">All</Link></Button>
              {tracks.map(track => (
-                <Button key={track.name} variant="ghost" size="sm" className="gap-2">
-                  {track.icon}
-                  {track.name}
+                <Button key={track.name} asChild variant="ghost" size="sm" className="gap-2">
+                  <Link href="#">
+                    {track.icon}
+                    {track.name}
+                  </Link>
                 </Button>
              ))}
-             <Button variant="ghost" size="sm">+6 More</Button>
+             <Button asChild variant="ghost" size="sm"><Link href="#">+6 More</Link></Button>
            </CardContent>
          </Card>
          <Card className="bg-card/80">
             <CardContent className="p-3 flex items-center gap-4 text-sm">
               <span className="text-muted-foreground">Filters:</span>
-              <Button variant="secondary" size="sm" className="gap-2">
-                <Gift className="text-pink-400"/>
-                FREE
+              <Button asChild variant="secondary" size="sm" className="gap-2">
+                <Link href="#">
+                  <Gift className="text-pink-400"/>
+                  FREE
+                </Link>
               </Button>
-              <Button variant="secondary" size="sm" className="gap-2">
-                Level
-                <ChevronDown className="h-4 w-4"/>
+              <Button asChild variant="secondary" size="sm" className="gap-2">
+                 <Link href="#">
+                    Level
+                    <ChevronDown className="h-4 w-4"/>
+                 </Link>
               </Button>
-              <Button variant="ghost" size="sm">Clear</Button>
+              <Button asChild variant="ghost" size="sm"><Link href="#">Clear</Link></Button>
             </CardContent>
          </Card>
       </div>

@@ -38,7 +38,11 @@ export function ProjectCard({ project, deleteProject }: ProjectCardProps) {
                 <Trash2 className="h-4 w-4" />
             </Button>
         </div>
-         <Badge variant="outline">FREE</Badge>
+         <div className="flex flex-wrap gap-2">
+            {project.tags?.map(tag => (
+                <Badge key={tag} variant="secondary" className="font-normal">{tag}</Badge>
+            ))}
+         </div>
       </CardHeader>
       <CardContent className="flex-1">
         <CardDescription className="line-clamp-3">{project.description}</CardDescription>

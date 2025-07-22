@@ -7,6 +7,7 @@ export const initialProjects: Project[] = [
     description: "Create a stunning personal portfolio to showcase your skills and projects using React and Tailwind CSS.",
     image: "https://placehold.co/600x400/3F51B5/ffffff.png",
     dataAiHint: "portfolio website",
+    tags: ["React", "Next.js", "Tailwind CSS", "Easy"],
     steps: [
       {
         id: "step-1-setup",
@@ -40,6 +41,7 @@ export const initialProjects: Project[] = [
     description: "A hands-on project to build a weather application that fetches and displays real-time weather data from an API.",
     image: "https://placehold.co/600x400/4DB6AC/ffffff.png",
     dataAiHint: "weather app",
+    tags: ["JavaScript", "API", "HTML", "Easy"],
     steps: [
       {
         id: "step-1-api",
@@ -59,7 +61,7 @@ export const initialProjects: Project[] = [
         subTasks: [
           { id: "sub-2-1", title: "Fetch Weather Data", description: "Write a function to fetch data from the API using the user's input.", completed: false },
           { id: "sub-2-2", title: "Display Weather Data", description: "Render the fetched weather data (temperature, conditions) on the page.", completed: false },
-          { id: "sub-2-3", title: "Add Geolocation Feature", description: "Get weather for the user's current location as a bonus feature.", completed: false },
+          { id: "sub-2-3", "title": "Add Geolocation Feature", "description": "Get weather for the user's current location as a bonus feature.", completed: false },
         ],
       },
     ],

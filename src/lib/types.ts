@@ -21,4 +21,5 @@ export interface Project {
   image: string;
   dataAiHint?: string;
   steps: TutorialStep[];
+  tags?: string[];
 }

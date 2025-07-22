@@ -36,6 +36,7 @@ const GenerateTutorialOutputSchema = z.object({
   title: z.string().describe('The main title of the overall tutorial.'),
   description: z.string().describe('A short, one-paragraph description of the entire project.'),
   steps: z.array(TutorialStepSchema).describe('An array of tutorial steps.'),
+  tags: z.array(z.string()).describe("A list of relevant tags for the project, such as programming language (e.g., 'C++'), frameworks (e.g., 'React'), and difficulty level ('Easy', 'Medium', 'Hard')."),
   progress: z.string().describe('A short summary of the generated tutorial.')
 });
 export type GenerateTutorialOutput = z.infer<typeof GenerateTutorialOutputSchema>;
@@ -54,6 +55,7 @@ Your response must follow these rules:
 1.  **Main Title and Description:** Generate a concise, descriptive main title and a one-paragraph summary for the entire project.
 2.  **High-Level Steps:** Break the tutorial into a series of logical, high-level steps (e.g., 'Project Setup', 'API Integration', 'UI Implementation'). Each step must have a title and a one-paragraph description.
 3.  **Granular Sub-Tasks:** For each step, create a list of specific, actionable sub-tasks. Each sub-task MUST have a unique ID, a descriptive title, and a single, informative sentence describing its purpose. The sub-task titles should be imperative (e.g., 'Create the Main Component', 'Implement the API Call').
+4.  **Tags:** Generate a list of relevant tags for the project. Include the primary programming language, any frameworks or major libraries, and a difficulty rating (Easy, Medium, or Hard).
 
 **CRITICAL:** Do NOT generate the actual implementation code or detailed markdown content in this step. You are only creating the tutorial's high-level structure and outline.
 

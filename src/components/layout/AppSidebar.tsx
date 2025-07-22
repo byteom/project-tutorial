@@ -49,7 +49,7 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                    <SidebarMenuButton href="#">
+                    <SidebarMenuButton href="/learn">
                         <BotMessageSquare />
                         Learn Anything
                         <Badge variant="secondary" className="ml-auto">BETA</Badge>
