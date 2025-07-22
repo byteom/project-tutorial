@@ -69,9 +69,6 @@ export function AppSidebar() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-sm font-bold">{tokenCount.toLocaleString()}</span>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => resetTokens()}>
-                          <RefreshCcw className="h-3 w-3" />
-                      </Button>
                     </div>
                 </div>
             </SidebarGroup>
