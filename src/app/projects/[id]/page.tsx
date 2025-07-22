@@ -13,7 +13,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { getPersonalizedAssistance } from "@/ai/flows/personalized-assistance";
@@ -24,7 +23,6 @@ import { ArrowLeft, Lightbulb, Loader2 } from "lucide-react";
 
 const assistanceFormSchema = z.object({
   userProgress: z.string().min(10, "Please describe the problem in a bit more detail."),
-  groqApiKey: z.string().optional(),
 });
 
 type AssistanceFormValues = z.infer<typeof assistanceFormSchema>;
@@ -154,16 +152,9 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
 
     const form = useForm<AssistanceFormValues>({
         resolver: zodResolver(assistanceFormSchema),
-        defaultValues: { userProgress: "", groqApiKey: "" },
+        defaultValues: { userProgress: "" },
     });
     
-    useEffect(() => {
-        const key = localStorage.getItem('groqApiKey');
-        if (key) {
-            form.setValue('groqApiKey', key);
-        }
-    }, [form]);
-
     const onSubmit = async (data: AssistanceFormValues) => {
         if (!currentStep) {
             toast({ variant: "destructive", title: "No active step selected" });
@@ -173,22 +164,17 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
         setIsLoading(true);
         setAssistance(null);
 
-        if (data.groqApiKey) {
-            localStorage.setItem('groqApiKey', data.groqApiKey);
-        }
-
         try {
             const result = await getPersonalizedAssistance({
                 tutorialStep: currentStep.title,
                 userProgress: data.userProgress,
-                groqApiKey: data.groqApiKey || "",
             });
             setAssistance(result.assistanceMessage);
         } catch (error) {
             toast({
                 variant: "destructive",
                 title: "Error getting assistance",
-                description: "Could not connect to the AI assistant. Please check your API key and try again.",
+                description: "Could not connect to the AI assistant. Please try again.",
             });
             console.error(error);
         } finally {
@@ -217,13 +203,6 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
                             <FormItem>
                                 <FormLabel>What seems to be the problem?</FormLabel>
                                 <FormControl><Textarea placeholder="e.g., I'm getting an error when I try to..." {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}/>
-                        <FormField control={form.control} name="groqApiKey" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Groq API Key (Optional)</FormLabel>
-                                <FormControl><Input type="password" placeholder="gsk_..." {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}/>

@@ -7,8 +7,8 @@
  * - PersonalizedAssistanceInput - The input type for the getPersonalizedAssistance function.
  * - PersonalizedAssistanceOutput - The return type for the getPersonalizedAssistance function.
  */
+import { ai } from '@/ai/genkit';
 import {z} from 'zod';
-import Groq from 'groq-sdk';
 
 const PersonalizedAssistanceInputSchema = z.object({
   tutorialStep: z
@@ -19,7 +19,6 @@ const PersonalizedAssistanceInputSchema = z.object({
     .describe(
       'Description of the users progress on the current step, including any errors or challenges they are facing.'
     ),
-  groqApiKey: z.string().describe('The users Groq API key.'),
 });
 export type PersonalizedAssistanceInput = z.infer<
   typeof PersonalizedAssistanceInputSchema
@@ -39,36 +38,32 @@ export type PersonalizedAssistanceOutput = z.infer<
 export async function getPersonalizedAssistance(
   input: PersonalizedAssistanceInput
 ): Promise<PersonalizedAssistanceOutput> {
+    return personalizedAssistanceFlow(input);
+}
 
-  const groq = new Groq({
-    apiKey: input.groqApiKey || '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'
-  });
+const prompt = ai.definePrompt({
+    name: 'personalizedAssistancePrompt',
+    input: { schema: PersonalizedAssistanceInputSchema },
+    output: { schema: PersonalizedAssistanceOutputSchema },
+    prompt: `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
 
-  const prompt = `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
-
-The user is currently on step: "${input.tutorialStep}"
+The user is currently on step: "{{tutorialStep}}"
 They are struggling with the following:
-"${input.userProgress}"
+"{{userProgress}}"
 
 Provide a helpful message that guides them towards resolving their issue and continuing with the tutorial.
-Your message should be encouraging and supportive.`;
+Your message should be encouraging and supportive.`,
+});
 
-  const chatCompletion = await groq.chat.completions.create({
-      messages: [
-          {
-              role: "user",
-              content: prompt,
-          },
-      ],
-      model: "meta-llama/llama-4-scout-17b-16e-instruct",
-      temperature: 0.7,
-      max_tokens: 1024,
-      top_p: 1,
-      stream: false,
-      stop: null
-  });
 
-  const assistanceMessage = chatCompletion.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
-  
-  return { assistanceMessage };
-}
+const personalizedAssistanceFlow = ai.defineFlow(
+    {
+        name: 'personalizedAssistanceFlow',
+        inputSchema: PersonalizedAssistanceInputSchema,
+        outputSchema: PersonalizedAssistanceOutputSchema,
+    },
+    async (input) => {
+        const { output } = await prompt(input);
+        return output!;
+    }
+);
