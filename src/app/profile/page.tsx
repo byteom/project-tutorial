@@ -10,14 +10,30 @@ import { useLearningPaths } from '@/hooks/use-learning-paths';
 import { useProjects } from '@/hooks/use-projects';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useUserPreferences, type OperatingSystem } from '@/hooks/use-user-preferences';
-import { BookOpen, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon } from 'lucide-react';
+import { BookOpen, CalendarDays, CheckCircle2, CircleDot, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon, Trophy, Briefcase, Star } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useMemo } from 'react';
 
 export default function ProfilePage() {
     const { user, signOut } = useAuth();
     const { projects } = useProjects();
     const { learningPaths } = useLearningPaths();
-    const { tokenCount } = useTokenUsage();
     const { operatingSystem, setOS, isLoading: isLoadingPreferences } = useUserPreferences();
+
+    const completedProjectsCount = useMemo(() => {
+        return projects.filter(p => p.steps.every(s => s.completed)).length;
+    }, [projects]);
+    
+    const inProgressProjectsCount = useMemo(() => {
+        return projects.filter(p => p.steps.some(s => s.subTasks.some(st => st.completed)) && p.steps.some(s => !s.completed)).length;
+    }, [projects]);
+    
+    const tasksCompletedCount = useMemo(() => {
+        return projects.reduce((acc, p) => acc + p.steps.flatMap(s => s.subTasks).filter(st => st.completed).length, 0);
+    }, [projects]);
+    
+    const createdProjectsCount = projects.length;
 
     if (!user) {
         return null;
@@ -25,78 +41,87 @@ export default function ProfilePage() {
     
     const stats = [
         {
-            icon: <Flame className="h-6 w-6 text-primary" />,
-            label: 'Projects Started',
-            value: projects.length,
+            icon: <Trophy className="h-6 w-6 text-yellow-400" />,
+            label: 'Completed Projects',
+            value: completedProjectsCount,
+            color: 'bg-yellow-400/10 border-yellow-400/20',
         },
         {
-            icon: <BookOpen className="h-6 w-6 text-primary" />,
-            label: 'Learning Paths Created',
-            value: learningPaths.length,
+            icon: <CircleDot className="h-6 w-6 text-blue-400" />,
+            label: 'In Progress',
+            value: inProgressProjectsCount,
+            color: 'bg-blue-400/10 border-blue-400/20',
         },
         {
-            icon: <ToyBrick className="h-6 w-6 text-primary" />,
-            label: 'Tokens Used (24h)',
-            value: tokenCount.toLocaleString(),
+            icon: <CheckCircle2 className="h-6 w-6 text-green-400" />,
+            label: 'Tasks Completed',
+            value: tasksCompletedCount,
+            color: 'bg-green-400/10 border-green-400/20',
+        },
+        {
+            icon: <Briefcase className="h-6 w-6 text-purple-400" />,
+            label: 'Created Projects',
+            value: createdProjectsCount,
+            color: 'bg-purple-400/10 border-purple-400/20',
         },
     ];
 
     return (
-        <div className="container mx-auto max-w-4xl py-12 px-4 space-y-8">
-            <header>
-                <h1 className="text-4xl font-bold font-headline flex items-center gap-3">
-                    <UserIcon className="h-8 w-8 text-primary" />
-                    My Profile
-                </h1>
-                <p className="text-muted-foreground mt-2">View your stats and manage your preferences.</p>
-            </header>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="md:col-span-1">
-                    <CardHeader className="items-center text-center">
-                        <Avatar className="h-24 w-24 mb-4">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`} alt="User Avatar" />
-                            <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
-                        </Avatar>
-                        <CardTitle className="font-headline">{user.email}</CardTitle>
-                        <CardDescription>Joined on {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'N/A'}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Button onClick={signOut} variant="outline" className="w-full">
-                            <LogOut className="mr-2" />
-                            Sign Out
-                        </Button>
-                    </CardContent>
-                </Card>
-                <div className="md:col-span-2 space-y-8">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-headline">Statistics</CardTitle>
-                            <CardDescription>Your activity on the platform.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                {stats.map((stat, index) => (
-                                    <Card key={index} className="bg-secondary/50 p-4 flex flex-col items-center text-center">
-                                        {stat.icon}
-                                        <p className="text-2xl font-bold mt-2">{stat.value}</p>
-                                        <p className="text-sm text-muted-foreground">{stat.label}</p>
-                                    </Card>
-                                ))}
+        <div className="container mx-auto max-w-6xl py-12 px-4 space-y-8">
+            <Card className="bg-card/50 border-border/50">
+                <CardContent className="p-6 flex items-center gap-6">
+                     <Avatar className="h-24 w-24 border-4 border-primary/50">
+                        <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`} alt="User Avatar" />
+                        <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                        <h1 className="text-3xl font-bold font-headline">{user.email?.split('@')[0]}</h1>
+                        <p className="text-muted-foreground">{user.email}</p>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                            <Badge variant="outline">Free Plan</Badge>
+                             <div className="flex items-center gap-2">
+                                <CalendarDays className="h-4 w-4" />
+                                <span>Member since {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric'}) : 'N/A'}</span>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
+                    <Button onClick={signOut} variant="destructive">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Logout
+                    </Button>
+                </CardContent>
+            </Card>
 
-                    <Card>
+            <Tabs defaultValue="overview" className="w-full">
+                <TabsList className="border-b w-full justify-start rounded-none bg-transparent p-0">
+                    <TabsTrigger value="overview" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none">Overview</TabsTrigger>
+                    <TabsTrigger value="projects" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none">Projects</TabsTrigger>
+                    <TabsTrigger value="showcases" className="data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none rounded-none">Showcases</TabsTrigger>
+                </TabsList>
+                <TabsContent value="overview" className="mt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {stats.map((stat) => (
+                            <Card key={stat.label} className={stat.color}>
+                                <CardContent className="p-6 flex flex-col items-start gap-4">
+                                    {stat.icon}
+                                    <div>
+                                        <p className="text-3xl font-bold">{stat.value}</p>
+                                        <p className="text-sm text-muted-foreground">{stat.label}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                     <Card className="mt-8">
                         <CardHeader>
                             <CardTitle className="font-headline flex items-center gap-2">
                                 <Laptop />
                                 Preferences
                             </CardTitle>
-                             <CardDescription>Customize your experience.</CardDescription>
+                             <CardDescription>Customize your experience to get tailored content.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-2">
+                            <div className="space-y-2 max-w-sm">
                                 <label className="text-sm font-medium">Operating System</label>
                                 {isLoadingPreferences ? (
                                     <div className="flex items-center gap-2">
@@ -121,8 +146,14 @@ export default function ProfilePage() {
                             </div>
                         </CardContent>
                     </Card>
-                </div>
-            </div>
+                </TabsContent>
+                 <TabsContent value="projects" className="mt-6 text-center text-muted-foreground py-16">
+                   <p>(Project list will be displayed here)</p>
+                </TabsContent>
+                 <TabsContent value="showcases" className="mt-6 text-center text-muted-foreground py-16">
+                    <p>(User showcases will be displayed here)</p>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
