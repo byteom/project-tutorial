@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { useEffect, useState, useCallback, createContext, useContext } from "react";
@@ -31,30 +30,40 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const fetchUserProfile = async (firebaseUser: FirebaseUser): Promise<AuthContextType['user']> => {
+  const fetchUserProfile = useCallback(async (firebaseUser: FirebaseUser): Promise<AuthContextType['user']> => {
     let profile = await getUserProfile(firebaseUser.uid);
-    // If no profile exists (e.g., for users created before this system), create one.
     if (!profile) {
       profile = await createUserProfile(firebaseUser);
     }
+    if (profile.status === 'blocked') {
+        throw new Error("Your account has been blocked.");
+    }
     return { ...firebaseUser, profile };
-  };
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userWithProfile = await fetchUserProfile(firebaseUser);
-        setUser(userWithProfile);
-        if (window.location.pathname === '/auth') {
-          router.replace('/project-practice');
+      try {
+        if (firebaseUser) {
+          const userWithProfile = await fetchUserProfile(firebaseUser);
+          setUser(userWithProfile);
+          if (window.location.pathname === '/auth') {
+            router.replace('/project-practice');
+          }
+        } else {
+          setUser(null);
         }
-      } else {
-        setUser(null);
+      } catch (err: any) {
+         setError(err.message);
+         setUser(null);
+         await firebaseSignOut(auth); // Sign out the user from Firebase auth if their profile is blocked
+         router.replace("/auth"); // Redirect to auth page on error (e.g. blocked user)
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
     return () => unsubscribe();
-  }, [router]);
+  }, [router, fetchUserProfile]);
 
   const signUp = useCallback(async (email: string, password: string) => {
     setError(null);

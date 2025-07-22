@@ -163,7 +163,7 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                      {isAdmin && (
                         <SidebarMenuItem>
-                            <Link href="/admin/add-question">
+                            <Link href="/admin/dashboard">
                                 <SidebarMenuButton isActive={pathname.startsWith('/admin')}>
                                     <ShieldCheck />
                                     Admin Panel

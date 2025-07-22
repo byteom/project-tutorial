@@ -1,5 +1,6 @@
 
 
+
 export interface SubTask {
     id: string;
     title: string;
@@ -87,5 +88,6 @@ export interface UserProfile {
   uid: string;
   email: string | null;
   roles: ('user' | 'admin')[];
-  // Add other profile fields here as needed
+  status?: 'active' | 'blocked';
+  createdAt?: number;
 }

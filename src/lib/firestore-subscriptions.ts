@@ -1,6 +1,8 @@
 
+'use server';
+
 import { db } from "./firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import type { Subscription } from "./types";
 
 export async function getUserSubscription(userId: string): Promise<Subscription> {
@@ -22,4 +24,10 @@ export async function getUserSubscription(userId: string): Promise<Subscription>
 
 export async function setUserSubscription(userId: string, data: Subscription) {
   await setDoc(doc(db, "subscriptions", userId), data, { merge: true });
+}
+
+export async function updateUserSubscription(userId: string, data: Partial<Subscription>) {
+    const subRef = doc(db, "subscriptions", userId);
+    // Use setDoc with merge to create the doc if it doesn't exist, or update it if it does.
+    await setDoc(subRef, data, { merge: true });
 }
