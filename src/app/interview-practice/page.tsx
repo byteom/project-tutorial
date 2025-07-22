@@ -6,6 +6,7 @@ import { ArrowRight, BadgeCheck, CheckCircle, FileQuestion, MessageSquareHeart, 
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
 import { interviewQuestions } from "@/lib/interview-data";
+import { Button } from "@/components/ui/button";
 
 const categories = [
     {
