@@ -1,3 +1,6 @@
+
+"use client";
+
 import { useEffect, useState, useCallback } from "react";
 import { auth } from "../lib/firebase";
 import {
@@ -19,9 +22,6 @@ export function useAuth() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
-      if (user) {
-        router.replace("/project-practice");
-      }
     });
     return () => unsubscribe();
   }, [router]);
@@ -56,4 +56,4 @@ export function useAuth() {
   }, []);
 
   return { user, loading, error, signUp, signIn, signOut };
-} 
+}
