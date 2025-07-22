@@ -52,77 +52,81 @@ export function AppSidebar() {
                 <span className="font-bold font-headline text-lg">PROJECTAI</span>
             </div>
         </SidebarHeader>
-        <SidebarContent className="p-2">
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <Link href="/" legacyBehavior passHref>
-                        <SidebarMenuButton as="a" isActive>
-                            <LayoutDashboard />
-                            Projects
-                        </SidebarMenuButton>
-                    </Link>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                     <Link href="/learn" legacyBehavior passHref>
-                        <SidebarMenuButton as="a">
-                            <BotMessageSquare />
-                            Learn Anything
-                            <Badge variant="secondary" className="ml-auto">BETA</Badge>
-                        </SidebarMenuButton>
-                    </Link>
-                </SidebarMenuItem>
-            </SidebarMenu>
-
-            {ongoingProjects.length > 0 && (
-                <SidebarGroup className="mt-4">
-                    <SidebarGroupLabel>Ongoing Projects</SidebarGroupLabel>
-                    <SidebarMenu>
-                        {ongoingProjects.map((project) => (
-                            <SidebarMenuItem key={project.id}>
-                                <Link href={`/projects/${project.id}`} legacyBehavior passHref>
-                                    <SidebarMenuButton as="a">
-                                        <Orbit className="text-green-500"/>
-                                        <span className="truncate">{project.title}</span>
-                                    </SidebarMenuButton>
-                                </Link>
-                            </SidebarMenuItem>
-                        ))}
-                    </SidebarMenu>
-                </SidebarGroup>
-            )}
-
-            <SidebarGroup className="mt-4">
-                <SidebarGroupLabel>Usage</SidebarGroupLabel>
-                 <div className="flex items-center justify-between p-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <ToyBrick className="h-4 w-4" />
-                        <span>Tokens Used</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-bold">{tokenCount.toLocaleString()}</span>
-                    </div>
-                </div>
-            </SidebarGroup>
-
-            <SidebarGroup className="mt-4">
-                <SidebarGroupLabel>Top Tracks</SidebarGroupLabel>
+        <SidebarContent className="flex flex-col p-2">
+            <div className="flex-1">
                 <SidebarMenu>
-                    {topTracks.map((track) => (
-                        <SidebarMenuItem key={track.name}>
-                            <SidebarMenuButton>
-                                {track.icon}
-                                {track.name}
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    ))}
                     <SidebarMenuItem>
-                        <SidebarMenuButton>
-                            <ChevronDown />
-                            Show All
-                        </SidebarMenuButton>
+                        <Link href="/" legacyBehavior passHref>
+                            <SidebarMenuButton as="a" isActive>
+                                <LayoutDashboard />
+                                Projects
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <Link href="/learn" legacyBehavior passHref>
+                            <SidebarMenuButton as="a">
+                                <BotMessageSquare />
+                                Learn Anything
+                                <Badge variant="secondary" className="ml-auto">BETA</Badge>
+                            </SidebarMenuButton>
+                        </Link>
                     </SidebarMenuItem>
                 </SidebarMenu>
-            </SidebarGroup>
+
+                <SidebarGroup className="mt-4">
+                    <SidebarGroupLabel>Top Tracks</SidebarGroupLabel>
+                    <SidebarMenu>
+                        {topTracks.map((track) => (
+                            <SidebarMenuItem key={track.name}>
+                                <SidebarMenuButton>
+                                    {track.icon}
+                                    {track.name}
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                        <SidebarMenuItem>
+                            <SidebarMenuButton>
+                                <ChevronDown />
+                                Show All
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    </SidebarMenu>
+                </SidebarGroup>
+            </div>
+
+            <div className="mt-auto">
+                <SidebarGroup>
+                    <SidebarGroupLabel>Usage</SidebarGroupLabel>
+                    <div className="flex items-center justify-between p-2 text-sm">
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <ToyBrick className="h-4 w-4" />
+                            <span>Tokens Used</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-bold">{tokenCount.toLocaleString()}</span>
+                        </div>
+                    </div>
+                </SidebarGroup>
+                
+                {ongoingProjects.length > 0 && (
+                    <SidebarGroup className="mt-2">
+                        <SidebarGroupLabel>Ongoing Projects</SidebarGroupLabel>
+                        <SidebarMenu>
+                            {ongoingProjects.map((project) => (
+                                <SidebarMenuItem key={project.id}>
+                                    <Link href={`/projects/${project.id}`} legacyBehavior passHref>
+                                        <SidebarMenuButton as="a">
+                                            <Orbit className="text-green-500"/>
+                                            <span className="truncate">{project.title}</span>
+                                        </SidebarMenuButton>
+                                    </Link>
+                                </SidebarMenuItem>
+                            ))}
+                        </SidebarMenu>
+                    </SidebarGroup>
+                )}
+            </div>
         </SidebarContent>
         <SidebarFooter className="p-2">
             <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary">
