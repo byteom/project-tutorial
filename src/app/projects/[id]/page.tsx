@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 import { useProjects } from "@/hooks/use-projects";
 import type { Project, TutorialStep } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -130,7 +131,7 @@ export default function ProjectPage() {
                         </div>
                     </AccordionTrigger>
                     <AccordionContent className="prose dark:prose-invert max-w-none px-4 text-base">
-                        <div dangerouslySetInnerHTML={{__html: step.content.replace(/\n/g, '<br />')}} />
+                        <ReactMarkdown>{step.content}</ReactMarkdown>
                     </AccordionContent>
                 </AccordionItem>
                 ))}
@@ -217,7 +218,7 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
                         <Lightbulb className="h-4 w-4" />
                         <AlertTitle>AI Assistant</AlertTitle>
                         <AlertDescription>{assistance}</AlertDescription>
-                    </Alert>
+                    </Aler
                 )}
             </DialogContent>
         </Dialog>
