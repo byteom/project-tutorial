@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function Home() {
-  const { projects, addProject, isLoading } = useProjects();
+  const { projects, addProject, deleteProject, isLoading } = useProjects();
 
   const tracks = [
     { name: "Web Development", icon: <Flame className="text-orange-500" /> },
@@ -83,7 +83,7 @@ export default function Home() {
            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
              {[...Array(3)].map((_, i) => (
                 <div key={i} className="flex flex-col space-y-3">
-                    <div className="h-[225px] w-full rounded-xl bg-muted animate-pulse" />
+                    <div className="h-[150px] w-full rounded-xl bg-muted animate-pulse" />
                     <div className="space-y-2">
                         <div className="h-4 w-[250px] bg-muted animate-pulse rounded-md" />
                         <div className="h-4 w-[200px] bg-muted animate-pulse rounded-md" />
@@ -92,7 +92,7 @@ export default function Home() {
              ))}
            </div>
         ) : (
-          <ProjectList projects={projects} />
+          <ProjectList projects={projects} deleteProject={deleteProject} />
         )}
       </section>
     </div>

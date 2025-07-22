@@ -1,5 +1,5 @@
+
 import Link from "next/link";
-import Image from "next/image";
 import type { Project } from "@/lib/types";
 import {
   Card,
@@ -9,43 +9,47 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { ArrowRight, BookOpen, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 
 interface ProjectCardProps {
   project: Project;
+  deleteProject: (id: string) => void;
 }
 
-export function ProjectCard({ project }: ProjectCardProps) {
+export function ProjectCard({ project, deleteProject }: ProjectCardProps) {
+
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const confirmation = confirm(`Are you sure you want to delete "${project.title}"?`);
+    if (confirmation) {
+      deleteProject(project.id);
+    }
+  };
+
   return (
-    <Link href={`/projects/${project.id}`} className="group block">
-      <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/50 bg-card/80">
-        <CardHeader className="flex-row gap-4 items-start pb-4">
-           <div className="aspect-square h-24 w-24 overflow-hidden rounded-md flex-shrink-0">
-             <Image
-              src={project.image}
-              alt={project.title}
-              width={200}
-              height={200}
-              className="object-cover transition-transform duration-300 ease-in-out group-hover:scale-105 h-full w-full"
-              data-ai-hint={project.dataAiHint || "project code"}
-            />
-          </div>
-          <div className="flex-1">
-             <CardTitle className="font-headline text-lg mb-2">{project.title}</CardTitle>
-             <Badge variant="outline">FREE</Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="flex-1">
-          <CardDescription className="line-clamp-3">{project.description}</CardDescription>
-        </CardContent>
-        <CardFooter>
-            <Button variant="secondary" className="w-full">
-                Start Project <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"/>
+    <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/50 bg-card/80 group">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+            <CardTitle className="font-headline text-lg mb-2">{project.title}</CardTitle>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 opacity-50 hover:opacity-100 transition-opacity" onClick={handleDelete}>
+                <Trash2 className="h-4 w-4" />
             </Button>
-        </CardFooter>
-      </Card>
-    </Link>
+        </div>
+         <Badge variant="outline">FREE</Badge>
+      </CardHeader>
+      <CardContent className="flex-1">
+        <CardDescription className="line-clamp-3">{project.description}</CardDescription>
+      </CardContent>
+      <CardFooter>
+          <Button asChild variant="secondary" className="w-full">
+              <Link href={`/projects/${project.id}`}>
+                Start Project <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"/>
+              </Link>
+          </Button>
+      </CardFooter>
+    </Card>
   );
 }

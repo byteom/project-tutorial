@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -46,5 +47,9 @@ export function useProjects() {
     );
   }, []);
 
-  return { projects, addProject, updateProject, isLoading };
+  const deleteProject = useCallback((projectId: string) => {
+    setProjects((prevProjects) => prevProjects.filter((p) => p.id !== projectId));
+  }, []);
+
+  return { projects, addProject, updateProject, deleteProject, isLoading };
 }
