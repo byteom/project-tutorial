@@ -2,7 +2,7 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
-import { Lightbulb, Wand2 } from "lucide-react";
+import { Wand2 } from "lucide-react";
 
 interface MiniTaskProps {
     message: string;
