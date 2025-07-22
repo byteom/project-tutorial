@@ -36,6 +36,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { operatingSystem, setOS } = useUserPreferences();
 
+  const isAdmin = user?.profile?.roles?.includes('admin') ?? false;
 
   // Gemini API Key logic
   const GEMINI_KEY_STORAGE = 'projectai_gemini_api_key';
@@ -160,14 +161,16 @@ export function AppSidebar() {
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
-                     <SidebarMenuItem>
-                        <Link href="/admin/add-question">
-                            <SidebarMenuButton isActive={pathname.startsWith('/admin')}>
-                                <ShieldCheck />
-                                Admin Panel
-                            </SidebarMenuButton>
-                        </Link>
-                    </SidebarMenuItem>
+                     {isAdmin && (
+                        <SidebarMenuItem>
+                            <Link href="/admin/add-question">
+                                <SidebarMenuButton isActive={pathname.startsWith('/admin')}>
+                                    <ShieldCheck />
+                                    Admin Panel
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                    )}
                 </SidebarMenu>
             </div>
 
