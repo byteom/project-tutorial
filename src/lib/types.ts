@@ -25,3 +25,23 @@ export interface Project {
   skills?: string[];
   simulationDiagram?: string;
 }
+
+export interface LearningLesson {
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+}
+
+export interface LearningModule {
+  id: string;
+  title: string;
+  description: string;
+  lessons: LearningLesson[];
+}
+
+export interface LearningPath {
+  title: string;
+  introduction: string;
+  modules: LearningModule[];
+}
