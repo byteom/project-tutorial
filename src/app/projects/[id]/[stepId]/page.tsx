@@ -49,12 +49,10 @@ export default function ProjectStepPage() {
         const foundStep = foundProject.steps.find(s => s.id === stepId);
         setStep(foundStep || null);
         if (foundStep && foundStep.subTasks.length > 0) {
-            // Find first uncompleted task, or default to the first task
             const firstUncompleted = foundStep.subTasks.find(st => !st.completed);
             const initialSubTask = firstUncompleted || foundStep.subTasks[0];
             
-            // Only set the active subtask if it's not already set to avoid re-renders
-            if (!activeSubTask || (activeSubTask && activeSubTask.id !== initialSubTask.id)) {
+            if (!activeSubTask || activeSubTask.id !== initialSubTask.id) {
                 setActiveSubTask(initialSubTask);
             }
         }
@@ -63,7 +61,6 @@ export default function ProjectStepPage() {
   }, [projectId, stepId, projects, projectsLoading, activeSubTask]);
 
   const generateAndSetContent = useCallback(async (subTask: SubTask) => {
-    // Critical check to prevent re-generation
     if (!project || !step || subTask.content) {
       return;
     }
@@ -98,7 +95,6 @@ export default function ProjectStepPage() {
           )
       };
 
-      // This call saves the new content to local storage via the useProjects hook
       updateProject(updatedProject); 
       setActiveSubTask(updatedSubTask);
 
@@ -176,6 +172,11 @@ export default function ProjectStepPage() {
   const stepIndex = project.steps.findIndex(s => s.id === step.id);
   const prevStep = stepIndex > 0 ? project.steps[stepIndex - 1] : null;
   const nextStep = stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null;
+
+  if (!activeSubTask) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+  
   const activeTaskContext = `Sub-Task: ${activeSubTask?.title}\nDescription: ${activeSubTask?.description}\n\n${activeSubTask?.content}`;
 
   return (
@@ -328,7 +329,6 @@ function ChecklistCard({
                                   checked={subTask.completed}
                                   onCheckedChange={() => onSubTaskToggle(subTask.id)}
                                   onClick={(e) => {
-                                      // Stop propagation to prevent the parent div's onClick from firing
                                       e.stopPropagation();
                                   }}
                                   aria-label={`Mark sub-task ${subTask.title} as complete`}
@@ -455,7 +455,3 @@ function PersonalizedAssistance({ context }: { context: string }) {
     </div>
   );
 }
-
-    
-
-    
