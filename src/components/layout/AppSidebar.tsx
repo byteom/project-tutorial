@@ -86,10 +86,9 @@ export function AppSidebar() {
                 <div className="flex-1">
                     <p className="text-sm font-semibold">Om singh</p>
                 </div>
-                <Button variant="default" size="sm" className='bg-primary/80 hover:bg-primary'>Upgrade</Button>
             </div>
              <p className='text-xs text-center text-muted-foreground pt-4'>
-                Made with ❤️ by @arpancodes
+                Made with ❤️ by certifyo-omsingh
             </p>
         </SidebarFooter>
     </Sidebar>

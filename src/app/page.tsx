@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ProjectList } from "@/components/projects/ProjectList";
@@ -5,15 +6,13 @@ import { GenerateTutorialForm } from "@/components/projects/GenerateTutorialForm
 import { useProjects } from "@/hooks/use-projects";
 import { Button } from "@/components/ui/button";
 import {
-  AlertCircle,
   ChevronDown,
   Gift,
-  Plus,
   Sparkles,
   Flame,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function Home() {
   const { projects, addProject, isLoading } = useProjects();
@@ -28,37 +27,11 @@ export default function Home() {
   ]
 
   return (
-    <div className="flex-1 overflow-auto p-4 md:p-8 space-y-4">
-      {/* Top Banners */}
-      <Card className="bg-gradient-to-r from-purple-600 to-indigo-600 border-0 text-white">
-        <CardContent className="p-3">
-          <div className="flex items-center justify-center gap-2">
-             <Flame className="text-orange-300"/>
-            <span>EXTENDED! Our 60% Discount Now Ends Today — 22nd July. This is your last chance — Don't Miss Out!</span>
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="bg-card/80">
-        <CardContent className="p-3 flex items-center justify-between">
-           <div className="flex items-center gap-2">
-            <Sparkles className="text-purple-400"/>
-            <p>New! Checkout new projects in Next.js with much elaborate tasks, let us know if they are better than the old ones!</p>
-          </div>
-          <Button variant="secondary" size="sm">Checkout</Button>
-        </CardContent>
-      </Card>
-      <Card className="bg-card/80">
-        <CardContent className="p-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Gift className="text-pink-400"/>
-            <p>We add 10+ new projects weekly! Can't find what you need? Generate your own projects now!</p>
-          </div>
-          <Button size="sm">Try for free!</Button>
-        </CardContent>
-      </Card>
+    <div className="flex-1 overflow-auto p-4 md:p-8 space-y-8">
+      
+      <GenerateTutorialForm addProject={addProject} />
 
-
-      <section className="pt-8">
+      <section>
         <h1 className="text-3xl font-bold font-headline mb-2 tracking-tight">
           PROJECTS
         </h1>
