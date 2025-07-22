@@ -329,6 +329,7 @@ function ChecklistCard({
 
 const assistanceFormSchema = z.object({
   question: z.string().min(10, "Please ask a more detailed question."),
+  userCode: z.string().optional(),
 });
 
 function PersonalizedAssistance({ context }: { context: string }) {
@@ -338,7 +339,7 @@ function PersonalizedAssistance({ context }: { context: string }) {
 
   const form = useForm<z.infer<typeof assistanceFormSchema>>({
     resolver: zodResolver(assistanceFormSchema),
-    defaultValues: { question: "" },
+    defaultValues: { question: "", userCode: "" },
   });
 
   const onSubmit = async (values: z.infer<typeof assistanceFormSchema>) => {
@@ -348,6 +349,7 @@ function PersonalizedAssistance({ context }: { context: string }) {
       const result = await getPersonalizedAssistance({
         tutorialStep: context,
         userProgress: values.question,
+        userCode: values.userCode,
       });
       setAssistance(result);
     } catch (error) {
@@ -375,8 +377,26 @@ function PersonalizedAssistance({ context }: { context: string }) {
                 <FormControl>
                   <Textarea
                     placeholder="e.g., 'I'm getting a 'module not found' error. What does that mean?'"
-                    rows={4}
+                    rows={3}
                     {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="userCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Code (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Paste the relevant code snippet here."
+                    rows={8}
+                    {...field}
+                    className="font-mono text-xs"
                   />
                 </FormControl>
                 <FormMessage />
@@ -407,4 +427,3 @@ function PersonalizedAssistance({ context }: { context: string }) {
     </div>
   );
 }
-

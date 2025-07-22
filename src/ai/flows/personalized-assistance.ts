@@ -20,6 +20,7 @@ const PersonalizedAssistanceInputSchema = z.object({
     .describe(
       'The user\'s specific question or a description of the error they are facing.'
     ),
+    userCode: z.optional(z.string()).describe("The code the user has written. If the user's question is about an error, analyze this code to provide a specific, contextual answer.")
 });
 export type PersonalizedAssistanceInput = z.infer<
   typeof PersonalizedAssistanceInputSchema
@@ -59,13 +60,28 @@ The user is working on the following tutorial task:
 ---
 "{{userProgress}}"
 ---
-
+{{#if userCode}}
+**USER'S CODE:**
+---
+\`\`\`
+{{userCode}}
+\`\`\`
+---
+**INSTRUCTIONS:**
+1.  **Analyze the Context:** Carefully read the user's question, their code, and the provided tutorial context.
+2.  **Provide a Direct Answer:** Directly address the user's question or problem. If they provided code with an error, identify the specific error in their code.
+3.  **Explain the "Why":** Don't just give the answer. Explain *why* the error is occurring and what concept they might be misunderstanding.
+4.  **Guide, Don't Solve:** Guide the user toward the correct solution. Provide corrected code snippets, but avoid giving away the complete solution for the entire task.
+5.  **Use Markdown:** Format your response for readability (e.g., use code fences for code, bold for emphasis).
+6.  **Be Encouraging:** Maintain a positive and supportive tone. Remind the user that getting stuck is a normal part of learning.
+{{else}}
 **INSTRUCTIONS:**
 1.  **Analyze the Context:** Carefully read the user's question and the provided tutorial context.
 2.  **Provide a Direct Answer:** Directly address the user's question or problem.
 3.  **Use Markdown:** Format your response using Markdown for readability (e.g., use code fences for code, bold for emphasis, and lists for steps).
 4.  **Be Encouraging:** Maintain a positive and supportive tone. Remind the user that getting stuck is a normal part of learning.
 5.  **Do Not Give the Full Answer:** Do not just give away the complete solution. Guide the user toward finding the solution themselves. Provide hints, suggest what to look for, or explain the relevant concept.
+{{/if}}
 `,
 });
 
