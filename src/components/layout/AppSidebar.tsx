@@ -81,15 +81,6 @@ export function AppSidebar() {
     return completedCount > 0 && completedCount < allSubTasks.length;
   });
 
-  const topTracks = [
-    { name: "Web Development", icon: <Code /> },
-    { name: "Full-Stack SpringBoot", icon: <GitBranch /> },
-    { name: "Machine Learning", icon: <FlaskConical /> },
-    { name: "React & Node.js", icon: <Code /> },
-    { name: "C++", icon: <Code /> },
-    { name: "Python", icon: <Code /> },
-  ]
-
   if (!user) {
     return null;
   }
@@ -153,26 +144,6 @@ export function AppSidebar() {
                         </Link>
                     </SidebarMenuItem>
                 </SidebarMenu>
-
-                <SidebarGroup className="mt-4">
-                    <SidebarGroupLabel>Top Tracks</SidebarGroupLabel>
-                    <SidebarMenu>
-                        {topTracks.map((track) => (
-                            <SidebarMenuItem key={track.name}>
-                                <SidebarMenuButton>
-                                    {track.icon}
-                                    {track.name}
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        ))}
-                        <SidebarMenuItem>
-                            <SidebarMenuButton>
-                                <ChevronDown />
-                                Show All
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarGroup>
             </div>
 
             <div className="mt-auto">

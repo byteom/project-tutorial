@@ -10,10 +10,12 @@ import { useLearningPaths } from '@/hooks/use-learning-paths';
 import { useProjects } from '@/hooks/use-projects';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useUserPreferences, type OperatingSystem } from '@/hooks/use-user-preferences';
-import { BookOpen, CalendarDays, CheckCircle2, CircleDot, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon, Trophy, Briefcase, Star } from 'lucide-react';
+import { BookOpen, CalendarDays, CheckCircle2, CircleDot, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon, Trophy, Briefcase, Star, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo } from 'react';
+import Link from 'next/link';
+import { Progress } from '@/components/ui/progress';
 
 export default function ProfilePage() {
     const { user, signOut } = useAuth();
@@ -26,7 +28,7 @@ export default function ProfilePage() {
     }, [projects]);
     
     const inProgressProjectsCount = useMemo(() => {
-        return projects.filter(p => p.steps.some(s => s.subTasks.some(st => st.completed)) && p.steps.some(s => !s.completed)).length;
+        return projects.filter(p => p.steps.some(s => s.subTasks.some(st => st.completed)) && !p.steps.every(s => s.completed)).length;
     }, [projects]);
     
     const tasksCompletedCount = useMemo(() => {
@@ -34,6 +36,10 @@ export default function ProfilePage() {
     }, [projects]);
     
     const createdProjectsCount = projects.length;
+
+    const pendingProjects = useMemo(() => {
+        return projects.filter(p => !p.steps.every(s => s.completed));
+    }, [projects]);
 
     if (!user) {
         return null;
@@ -147,9 +153,43 @@ export default function ProfilePage() {
                         </CardContent>
                     </Card>
                 </TabsContent>
-                 <TabsContent value="projects" className="mt-6 text-center text-muted-foreground py-16">
-                   <p>(Project list will be displayed here)</p>
-                </TabsContent>
+                 <TabsContent value="projects" className="mt-6">
+                    {pendingProjects.length > 0 ? (
+                        <div className="space-y-4">
+                            {pendingProjects.map(project => {
+                                const totalSubTasks = project.steps.reduce((acc, step) => acc + (step.subTasks?.length || 0), 0);
+                                const completedSubTasks = project.steps.reduce((acc, step) => acc + (step.subTasks?.filter(st => st.completed).length || 0), 0);
+                                const progress = totalSubTasks > 0 ? (completedSubTasks / totalSubTasks) * 100 : 0;
+                                
+                                return (
+                                <Card key={project.id} className="group hover:border-primary/50 transition-colors">
+                                    <CardContent className="p-4 flex items-center gap-4">
+                                        <div className="flex-1">
+                                            <Link href={`/projects/${project.id}`}>
+                                                <h3 className="font-bold group-hover:text-primary transition-colors">{project.title}</h3>
+                                            </Link>
+                                            <p className="text-sm text-muted-foreground line-clamp-1">{project.description}</p>
+                                            <div className="mt-2 flex items-center gap-4">
+                                                <Progress value={progress} className="h-2 w-full max-w-xs" />
+                                                <span className="text-xs text-muted-foreground">{Math.round(progress)}%</span>
+                                            </div>
+                                        </div>
+                                        <Button asChild variant="ghost" size="icon">
+                                            <Link href={`/projects/${project.id}`}>
+                                                <ArrowRight />
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                         <div className="text-center text-muted-foreground py-16">
+                           <p>You have no pending projects.</p>
+                        </div>
+                    )}
+                 </TabsContent>
                  <TabsContent value="showcases" className="mt-6 text-center text-muted-foreground py-16">
                     <p>(User showcases will be displayed here)</p>
                 </TabsContent>
