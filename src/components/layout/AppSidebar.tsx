@@ -26,6 +26,7 @@ export function AppSidebar() {
   const { projects } = useProjects();
 
   const ongoingProjects = projects.filter(p => {
+    if (!p.steps) return false;
     const allSubTasks = p.steps.flatMap(s => s.subTasks || []);
     if (allSubTasks.length === 0) return false;
     const completedCount = allSubTasks.filter(st => st && st.completed).length;
@@ -81,7 +82,7 @@ export function AppSidebar() {
                                 <Link href={`/projects/${project.id}`} legacyBehavior passHref>
                                     <SidebarMenuButton as="a">
                                         <Orbit className="text-green-500"/>
-                                        {project.title}
+                                        <span className="truncate">{project.title}</span>
                                     </SidebarMenuButton>
                                 </Link>
                             </SidebarMenuItem>
