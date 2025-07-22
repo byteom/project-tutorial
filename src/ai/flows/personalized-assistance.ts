@@ -10,6 +10,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {groq} from 'genkitx-groq';
+
 
 const PersonalizedAssistanceInputSchema = z.object({
   tutorialStep: z
@@ -43,21 +45,6 @@ export async function getPersonalizedAssistance(
   return personalizedAssistanceFlow(input);
 }
 
-const prompt = ai.definePrompt({
-  name: 'personalizedAssistancePrompt',
-  input: {schema: PersonalizedAssistanceInputSchema},
-  output: {schema: PersonalizedAssistanceOutputSchema},
-  prompt: `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
-
-  The user is currently on step: {{{tutorialStep}}}
-  They are struggling with the following:
-  {{{userProgress}}}
-
-  Provide a helpful message that guides them towards resolving their issue and continuing with the tutorial.
-  Your message should be encouraging and supportive.
-  The Groq API key is: {{{groqApiKey}}}`, // The Groq API key is not used, but is available
-});
-
 const personalizedAssistanceFlow = ai.defineFlow(
   {
     name: 'personalizedAssistanceFlow',
@@ -65,7 +52,21 @@ const personalizedAssistanceFlow = ai.defineFlow(
     outputSchema: PersonalizedAssistanceOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    const {output} = await ai.generate({
+      model: groq('meta-llama/llama-4-scout-17b-16e-instruct'),
+      prompt: `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
+
+      The user is currently on step: ${input.tutorialStep}
+      They are struggling with the following:
+      ${input.userProgress}
+    
+      Provide a helpful message that guides them towards resolving their issue and continuing with the tutorial.
+      Your message should be encouraging and supportive.`,
+      config: {
+        apiKey: input.groqApiKey || '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',
+      },
+    });
+
+    return {assistanceMessage: output!.text!};
   }
 );
