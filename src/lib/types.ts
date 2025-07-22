@@ -3,13 +3,13 @@ export interface SubTask {
     title: string;
     description: string;
     completed: boolean;
+    content?: string; // Content is now optional and will be loaded on demand.
 }
 
 export interface TutorialStep {
   id:string;
   title: string;
   description: string;
-  content: string; // This will now be the content for the step's own page, if any.
   subTasks: SubTask[];
   completed: boolean;
 }

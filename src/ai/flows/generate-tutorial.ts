@@ -29,7 +29,6 @@ const TutorialStepSchema = z.object({
     id: z.string().describe("A unique ID for the step (e.g., 'step-1-setup')."),
     title: z.string().describe('The title of the tutorial step.'),
     description: z.string().describe('A short, one-paragraph description of what this step covers.'),
-    content: z.string().describe('The detailed, well-structured Markdown content for the entire step, explaining the concepts and providing code examples for its sub-tasks. All code snippets must be in fenced code blocks with language identifiers.'),
     subTasks: z.array(SubTaskSchema).describe('A list of specific, actionable sub-tasks for this step.'),
 });
 
@@ -49,15 +48,14 @@ const prompt = ai.definePrompt({
   name: 'generateTutorialPrompt',
   input: {schema: GenerateTutorialInputSchema},
   output: {schema: GenerateTutorialOutputSchema},
-  prompt: `You are an expert tutorial generator. You will generate a tutorial from the given prompt.
-The tutorial should be well-structured and use Markdown for formatting.
+  prompt: `You are an expert tutorial generator specializing in creating detailed, project-based learning guides for software developers. Your output should be structured, clear, and follow best practices for technical instruction.
 
 Your response must follow these rules:
-1.  Generate a main title and a short, one-paragraph description for the entire project.
-2.  Break the tutorial down into a series of distinct, high-level steps (e.g., 'Project Setup', 'API Integration').
-3.  For each step, provide a title, a short description, and a list of specific, actionable sub-tasks. Each sub-task needs a title and a one-sentence description.
-4.  The 'content' for each step must contain all the detailed explanations and code for that step and all its sub-tasks. This should be a comprehensive guide.
-5.  All code snippets in the 'content' field must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash). Do not include the filename inside the code block fence.
+1.  **Main Title and Description:** Generate a concise, descriptive main title and a one-paragraph summary for the entire project.
+2.  **High-Level Steps:** Break the tutorial into a series of logical, high-level steps (e.g., 'Project Setup', 'API Integration', 'UI Implementation'). Each step must have a title and a one-paragraph description.
+3.  **Granular Sub-Tasks:** For each step, create a list of specific, actionable sub-tasks. Each sub-task MUST have a unique ID, a descriptive title, and a single, informative sentence describing its purpose. The sub-task titles should be imperative (e.g., 'Create the Main Component', 'Implement the API Call').
+
+**CRITICAL:** Do NOT generate the actual implementation code or detailed markdown content in this step. You are only creating the tutorial's high-level structure and outline.
 
 Prompt: {{{prompt}}}`,
 });

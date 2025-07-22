@@ -38,7 +38,7 @@ const parseTutorial = (output: GenerateTutorialOutput, prompt: string): Project 
     steps: steps.map(step => ({
         ...step,
         completed: false,
-        subTasks: step.subTasks.map(subTask => ({ ...subTask, completed: false }))
+        subTasks: step.subTasks.map(subTask => ({ ...subTask, completed: false, content: '' }))
     })),
   };
 };
