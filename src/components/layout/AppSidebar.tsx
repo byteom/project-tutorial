@@ -3,6 +3,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -28,6 +29,7 @@ export function AppSidebar() {
   const { tokenCount } = useTokenUsage();
   const { projects } = useProjects();
   const { toast } = useToast();
+  const pathname = usePathname();
 
   // Gemini API Key logic
   const GEMINI_KEY_STORAGE = 'projectai_gemini_api_key';
@@ -125,7 +127,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <Link href="/project-practice">
-                            <SidebarMenuButton isActive>
+                            <SidebarMenuButton isActive={pathname.startsWith('/project-practice') || pathname.startsWith('/projects')}>
                                 <LayoutDashboard />
                                 Projects
                             </SidebarMenuButton>
@@ -133,7 +135,7 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <Link href="/learn">
-                            <SidebarMenuButton>
+                            <SidebarMenuButton isActive={pathname === '/learn'}>
                                 <BotMessageSquare />
                                 Learn Anything
                                 <Badge variant="secondary" className="ml-auto">BETA</Badge>
