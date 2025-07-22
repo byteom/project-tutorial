@@ -1,3 +1,4 @@
+
 export interface SubTask {
     id: string;
     title: string;
@@ -47,4 +48,13 @@ export interface LearningPath {
   modules: LearningModule[];
   difficulty: string;
   topic: string;
+}
+
+export interface Subscription {
+    userId: string;
+    status: 'free' | 'pro';
+    plan: string;
+    subscriptionId?: string; // e.g., from a payment provider
+    trial_end?: number; // timestamp
+    current_period_end?: number; // timestamp
 }

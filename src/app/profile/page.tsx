@@ -10,18 +10,21 @@ import { useLearningPaths } from '@/hooks/use-learning-paths';
 import { useProjects } from '@/hooks/use-projects';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useUserPreferences, type OperatingSystem } from '@/hooks/use-user-preferences';
-import { BookOpen, CalendarDays, CheckCircle2, CircleDot, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon, Trophy, Briefcase, Star, ArrowRight } from 'lucide-react';
+import { BookOpen, CalendarDays, CheckCircle2, CircleDot, Flame, Laptop, Loader2, LogOut, ToyBrick, User as UserIcon, Trophy, Briefcase, Star, ArrowRight, Crown } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { Progress } from '@/components/ui/progress';
+import { useSubscription } from '@/hooks/use-subscription';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function ProfilePage() {
     const { user, signOut } = useAuth();
     const { projects } = useProjects();
     const { learningPaths } = useLearningPaths();
     const { operatingSystem, setOS, isLoading: isLoadingPreferences } = useUserPreferences();
+    const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
 
     const completedProjectsCount = useMemo(() => {
         return projects.filter(p => p.steps.every(s => s.completed)).length;
@@ -84,7 +87,13 @@ export default function ProfilePage() {
                         <h1 className="text-3xl font-bold font-headline">{user.email?.split('@')[0]}</h1>
                         <p className="text-muted-foreground">{user.email}</p>
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                            <Badge variant="outline">Free Plan</Badge>
+                            {isSubscriptionLoading ? (
+                                <Badge variant="outline">Loading plan...</Badge>
+                            ) : (
+                                <Badge variant={subscription?.status === 'pro' ? 'default' : 'secondary'}>
+                                    {subscription?.status === 'pro' ? 'Pro Plan' : 'Free Plan'}
+                                </Badge>
+                            )}
                              <div className="flex items-center gap-2">
                                 <CalendarDays className="h-4 w-4" />
                                 <span>Member since {user.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric'}) : 'N/A'}</span>
@@ -97,6 +106,19 @@ export default function ProfilePage() {
                     </Button>
                 </CardContent>
             </Card>
+
+            {subscription?.status !== 'pro' && !isSubscriptionLoading && (
+                <Alert variant="destructive">
+                    <Crown className="h-4 w-4" />
+                    <AlertTitle>You are on the Free Plan</AlertTitle>
+                    <AlertDescription>
+                        Upgrade to Pro to unlock unlimited project and learning path generation!
+                        <Button asChild size="sm" className="ml-4">
+                            <Link href="/pricing">Upgrade Now</Link>
+                        </Button>
+                    </AlertDescription>
+                </Alert>
+            )}
 
             <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="border-b w-full justify-start rounded-none bg-transparent p-0">

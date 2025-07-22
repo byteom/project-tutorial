@@ -23,6 +23,10 @@ import CodeBlock from "@/components/projects/CodeBlock";
 import type { LearningPath, LearningModule, LearningLesson } from "@/lib/types";
 import { useLearningPaths } from "@/hooks/use-learning-paths";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
+import { useSubscription } from "@/hooks/use-subscription";
+import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 const formSchema = z.object({
   topic: z.string().min(2, {
@@ -40,6 +44,7 @@ export default function LearnAnythingPage() {
   const { learningPaths, addLearningPath, deleteLearningPath, updateLearningPath, isLoading: isLoadingPaths } = useLearningPaths();
   const [activeLearningPath, setActiveLearningPath] = useState<LearningPath | null>(null);
   const { operatingSystem } = useUserPreferences();
+  const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
 
   const { toast } = useToast();
   const { addTokens } = useTokenUsage();
@@ -48,8 +53,19 @@ export default function LearnAnythingPage() {
     resolver: zodResolver(formSchema),
     defaultValues: { topic: "" },
   });
+  
+  const canGenerate = isSubscriptionLoading || subscription?.status === 'pro' || learningPaths.length < 3;
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (!canGenerate) {
+        toast({
+            variant: "destructive",
+            title: "Upgrade to Pro",
+            description: "You have reached the limit of 3 learning paths for free users.",
+        });
+        return;
+    }
+
     setIsGenerating(true);
     setActiveLearningPath(null);
     try {
@@ -177,58 +193,69 @@ export default function LearnAnythingPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="topic"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Topic</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g., 'C++', 'Python for Data Science'"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                 <FormField
-                  control={form.control}
-                  name="difficulty"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Difficulty</FormLabel>
-                       <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <fieldset disabled={!canGenerate} className="space-y-6 group">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                    control={form.control}
+                    name="topic"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Topic</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a difficulty level" />
-                          </SelectTrigger>
+                            <Input
+                            placeholder="e.g., 'C++', 'Python for Data Science'"
+                            {...field}
+                            />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Easy">Easy</SelectItem>
-                          <SelectItem value="Medium">Medium</SelectItem>
-                          <SelectItem value="Hard">Hard</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <Button type="submit" disabled={isGenerating} className="w-full">
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Curriculum...
-                  </>
-                ) : (
-                  "Generate Learning Path"
-                )}
-              </Button>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                    <FormField
+                    control={form.control}
+                    name="difficulty"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Difficulty</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a difficulty level" />
+                            </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                            <SelectItem value="Easy">Easy</SelectItem>
+                            <SelectItem value="Medium">Medium</SelectItem>
+                            <SelectItem value="Hard">Hard</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </div>
+                <Button type="submit" disabled={isGenerating || !canGenerate} className="w-full group-disabled:cursor-not-allowed">
+                    {isGenerating ? (
+                    <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Curriculum...
+                    </>
+                    ) : (
+                    "Generate Learning Path"
+                    )}
+                </Button>
+              </fieldset>
             </form>
           </Form>
+          {!canGenerate && (
+            <Alert className="mt-4">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Free Plan Limit Reached</AlertTitle>
+              <AlertDescription>
+                You've created {learningPaths.length}/3 free learning paths. Please <Link href="/pricing" className="font-bold text-primary hover:underline">upgrade to Pro</Link> to create more.
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 

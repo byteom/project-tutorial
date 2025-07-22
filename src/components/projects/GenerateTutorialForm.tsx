@@ -12,12 +12,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import type { Project } from "@/lib/types";
-import { Sparkles, Loader2 } from "lucide-react";
+import { Sparkles, Loader2, Terminal } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useTokenUsage } from "@/hooks/use-token-usage";
 import { useUserPreferences } from "@/hooks/use-user-preferences";
-
+import { useProjects } from "@/hooks/use-projects";
+import { useSubscription } from "@/hooks/use-subscription";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import Link from "next/link";
 
 const formSchema = z.object({
   prompt: z.string().min(10, {
@@ -29,10 +32,6 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-
-interface GenerateTutorialFormProps {
-  addProject: (project: Project) => void;
-}
 
 const parseTutorial = (output: GenerateTutorialOutput, prompt: string): Project => {
   const { title, description, steps, tags, skills, simulationDiagram } = output;
@@ -54,19 +53,32 @@ const parseTutorial = (output: GenerateTutorialOutput, prompt: string): Project 
   };
 };
 
-export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) {
+export function GenerateTutorialForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
   const { addTokens } = useTokenUsage();
   const { operatingSystem } = useUserPreferences();
+  const { projects, addProject } = useProjects();
+  const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { prompt: "" },
   });
 
+  const canGenerate = isSubscriptionLoading || subscription?.status === 'pro' || projects.length < 3;
+
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (!canGenerate) {
+        toast({
+            variant: "destructive",
+            title: "Upgrade to Pro",
+            description: "You have reached the limit of 3 projects for free users.",
+        });
+        return;
+    }
+
     setIsLoading(true);
     try {
       const result = await generateTutorial({ 
@@ -80,7 +92,7 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
       }
 
       const newProject = parseTutorial(result, data.prompt);
-      addProject(newProject);
+      await addProject(newProject);
       toast({
         title: "Tutorial Generated!",
         description: `Project "${newProject.title}" has been added.`,
@@ -113,58 +125,69 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="prompt"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Project Idea</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="e.g., 'A blog built with Next.js and MDX', 'A real-time chat application using Firebase'"
-                      className="resize-none"
-                      rows={4}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="difficulty"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Difficulty</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a difficulty level" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "Forge Project"
-              )}
-            </Button>
+            <fieldset disabled={!canGenerate} className="space-y-6 group">
+                <FormField
+                  control={form.control}
+                  name="prompt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Idea</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="e.g., 'A blog built with Next.js and MDX', 'A real-time chat application using Firebase'"
+                          className="resize-none"
+                          rows={4}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Difficulty</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a difficulty level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Easy">Easy</SelectItem>
+                          <SelectItem value="Medium">Medium</SelectItem>
+                          <SelectItem value="Hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" disabled={isLoading || !canGenerate} className="w-full sm:w-auto group-disabled:cursor-not-allowed">
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    "Forge Project"
+                  )}
+                </Button>
+            </fieldset>
           </form>
         </Form>
+        {!canGenerate && (
+            <Alert className="mt-4">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Free Plan Limit Reached</AlertTitle>
+              <AlertDescription>
+                You've created {projects.length}/3 free projects. Please <Link href="/pricing" className="font-bold text-primary hover:underline">upgrade to Pro</Link> to create more.
+              </AlertDescription>
+            </Alert>
+          )}
       </CardContent>
     </Card>
   );

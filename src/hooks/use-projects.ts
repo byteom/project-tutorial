@@ -23,17 +23,28 @@ export function useProjects() {
       setIsLoading(false);
       return;
     }
-    setIsLoading(true);
-    getUserProjects(user.uid)
-      .then((fetched) => {
-        setProjects(fetched.length ? fetched : initialProjects);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Failed to load projects from Firestore", error);
-        setProjects(initialProjects);
-        setIsLoading(false);
-      });
+    const loadProjects = async () => {
+        setIsLoading(true);
+        try {
+            const fetched = await getUserProjects(user.uid);
+            // If user has no projects in DB, initialize with default and save them.
+            if (fetched.length === 0) {
+                setProjects(initialProjects);
+                // Save initial projects to user's DB
+                for (const project of initialProjects) {
+                    await addUserProject(user.uid, project);
+                }
+            } else {
+                setProjects(fetched);
+            }
+        } catch (error) {
+            console.error("Failed to load or initialize projects from Firestore", error);
+            setProjects(initialProjects); // Fallback to initial data on error
+        } finally {
+            setIsLoading(false);
+        }
+    };
+    loadProjects();
   }, [user]);
 
   const addProject = useCallback(

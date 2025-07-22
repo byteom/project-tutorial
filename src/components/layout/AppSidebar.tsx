@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut, Crown } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useProjects } from '@/hooks/use-projects';
 import { Input } from '../ui/input';
@@ -88,12 +88,12 @@ export function AppSidebar() {
   return (
     <Sidebar>
         <SidebarHeader>
-            <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary">
-                    <Cpu />
-                </Button>
-                <span className="font-bold font-headline text-lg">PROJECTAI</span>
-            </div>
+          <Link href="/" className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary">
+                <Cpu />
+            </Button>
+            <span className="font-bold font-headline text-lg">PROJECTAI</span>
+          </Link>
         </SidebarHeader>
         <SidebarContent className="flex flex-col p-2">
             {showPrompt && (
@@ -140,6 +140,14 @@ export function AppSidebar() {
                                 <BotMessageSquare />
                                 Learn Anything
                                 <Badge variant="secondary" className="ml-auto">BETA</Badge>
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <Link href="/pricing">
+                            <SidebarMenuButton isActive={pathname.startsWith('/pricing')}>
+                                <Crown />
+                                Pricing
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
