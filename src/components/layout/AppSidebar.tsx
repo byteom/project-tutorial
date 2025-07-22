@@ -56,7 +56,7 @@ export function AppSidebar() {
             <div className="flex-1">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <Link href="/">
+                        <Link href="/project-practice">
                             <SidebarMenuButton isActive>
                                 <LayoutDashboard />
                                 Projects

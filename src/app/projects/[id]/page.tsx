@@ -44,7 +44,7 @@ export default function ProjectOutlinePage() {
             <h2 className="text-2xl font-bold">Project not found</h2>
             <p className="text-muted-foreground mt-2">The project you are looking for does not exist.</p>
             <Button asChild className="mt-4">
-                <Link href="/">Go back to projects</Link>
+                <Link href="/project-practice">Go back to projects</Link>
             </Button>
         </div>
     );
@@ -56,7 +56,7 @@ export default function ProjectOutlinePage() {
     <div className="container mx-auto px-4 py-8 max-w-5xl">
       <div className="mb-8">
         <Button variant="ghost" asChild>
-            <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" /> Back to All Projects</Link>
+            <Link href="/project-practice"><ArrowLeft className="mr-2 h-4 w-4" /> Back to All Projects</Link>
         </Button>
       </div>
       <header className="mb-12 text-center">
