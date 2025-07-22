@@ -17,12 +17,20 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
+import { useProjects } from '@/hooks/use-projects';
 
 export function AppSidebar() {
+  const { tokenCount } = useTokenUsage();
+  const { projects } = useProjects();
 
-  const { tokenCount, resetTokens } = useTokenUsage();
+  const ongoingProjects = projects.filter(p => {
+    const allSubTasks = p.steps.flatMap(s => s.subTasks);
+    if (allSubTasks.length === 0) return false;
+    const completedCount = allSubTasks.filter(st => st.completed).length;
+    return completedCount > 0 && completedCount < allSubTasks.length;
+  });
 
   const topTracks = [
     { name: "Web Development", icon: <Code /> },
@@ -59,6 +67,22 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
+
+            {ongoingProjects.length > 0 && (
+                <SidebarGroup className="mt-4">
+                    <SidebarGroupLabel>Ongoing Projects</SidebarGroupLabel>
+                    <SidebarMenu>
+                        {ongoingProjects.map((project) => (
+                            <SidebarMenuItem key={project.id}>
+                                <SidebarMenuButton href={`/projects/${project.id}`}>
+                                    <Orbit className="text-green-500"/>
+                                    {project.title}
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        ))}
+                    </SidebarMenu>
+                </SidebarGroup>
+            )}
 
             <SidebarGroup className="mt-4">
                 <SidebarGroupLabel>Usage</SidebarGroupLabel>

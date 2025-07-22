@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
@@ -44,6 +45,9 @@ export default function RootLayout({
           </div>
         </SidebarProvider>
         <Toaster />
+        <footer className="p-4 text-center text-xs text-muted-foreground border-t">
+            AI-Generated Content. Please review this guidance carefully. AI can make mistakes, so always verify critical information and use your judgment.
+        </footer>
       </body>
     </html>
   );
