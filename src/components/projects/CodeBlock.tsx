@@ -7,19 +7,38 @@ import { cn } from "@/lib/utils";
 
 interface CodeBlockProps extends React.HTMLAttributes<HTMLPreElement> {}
 
+const getCodeFromChildren = (children: React.ReactNode): string => {
+    if (typeof children === 'string') {
+        return children;
+    }
+    if (React.isValidElement(children) && 'props' in children) {
+        if (typeof children.props.children === 'string') {
+            return children.props.children;
+        }
+        if (Array.isArray(children.props.children)) {
+            return children.props.children.map(child => getCodeFromChildren(child)).join('');
+        }
+    }
+    if (Array.isArray(children)) {
+        return children.map(child => getCodeFromChildren(child)).join('');
+    }
+    return '';
+}
+
 export default function CodeBlock({ children, className, ...props }: CodeBlockProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   const handleCopy = () => {
     if (typeof window === "undefined" || !children) return;
     
-    const codeElement = children as React.ReactElement;
-    const codeString = codeElement.props.children as string;
+    const codeString = getCodeFromChildren(children);
 
-    navigator.clipboard.writeText(codeString).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    });
+    if (codeString) {
+        navigator.clipboard.writeText(codeString).then(() => {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        });
+    }
   };
 
   return (

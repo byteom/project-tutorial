@@ -32,7 +32,16 @@ const prompt = ai.definePrompt({
   name: 'generateTutorialPrompt',
   input: {schema: GenerateTutorialInputSchema},
   output: {schema: GenerateTutorialOutputSchema},
-  prompt: `You are an expert tutorial generator. You will generate a tutorial from the given prompt. The tutorial should include explanations, code snippets, links for documentation, and more.\n\nPrompt: {{{prompt}}}`,
+  prompt: `You are an expert tutorial generator. You will generate a tutorial from the given prompt.
+The tutorial should be well-structured and use Markdown for formatting.
+
+Your response must follow these rules:
+1.  The first line must be a single H1 heading (e.g., '# My Awesome Tutorial'). This will be the project title.
+2.  The next few lines should be a short, one-paragraph description of the project.
+3.  The rest of the content must be a series of steps, each starting with an H2 heading (e.g., '## Step 1: Setting up').
+4.  All code snippets must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash).
+
+Prompt: {{{prompt}}}`,
 });
 
 const generateTutorialFlow = ai.defineFlow(
