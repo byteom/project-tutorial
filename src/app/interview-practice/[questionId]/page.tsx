@@ -5,13 +5,8 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { interviewQuestions } from '@/lib/interview-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Wand2 } from 'lucide-react';
-import { z } from 'zod';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Loader2, Sparkles, Wand2, Mic, Square, Circle } from 'lucide-react';
 import { generateInterviewFeedback, GenerateInterviewFeedbackOutput } from '@/ai/flows/generate-interview-feedback';
 import { useToast } from '@/hooks/use-toast';
 import { useTokenUsage } from '@/hooks/use-token-usage';
@@ -20,14 +15,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { BellCurveChart } from '@/components/charts/BellCurveChart';
 import { useAuth } from '@/hooks/use-auth';
 import { addInterviewAnswer } from '@/lib/firestore-interview-answers';
-
-const formSchema = z.object({
-    answer: z.string().min(50, {
-        message: 'Your answer should be at least 50 characters long to get effective feedback.',
-    }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useAudioRecorder } from '@/hooks/use-audio-recorder';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export default function QuestionPracticePage() {
     const params = useParams();
@@ -36,48 +25,57 @@ export default function QuestionPracticePage() {
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [feedback, setFeedback] = useState<GenerateInterviewFeedbackOutput | null>(null);
-    const [lastAnswer, setLastAnswer] = useState('');
     const { toast } = useToast();
     const { addTokens } = useTokenUsage();
+    const { startRecording, stopRecording, isRecording, recordingTime, audioBlob } = useAudioRecorder();
 
-    const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            answer: '',
-        },
-    });
+    const handleSubmit = async () => {
+        if (!question || !user || !audioBlob) {
+            toast({
+                variant: 'destructive',
+                title: 'No Audio Recorded',
+                description: 'Please record your answer before submitting.',
+            });
+            return;
+        }
 
-    const onSubmit: SubmitHandler<FormValues> = async (data) => {
-        if (!question || !user) return;
         setIsGenerating(true);
         setFeedback(null);
-        setLastAnswer(data.answer);
+
         try {
-            const result = await generateInterviewFeedback({
-                question: question.question,
-                answer: data.answer,
-            });
+            const reader = new FileReader();
+            reader.readAsDataURL(audioBlob);
+            reader.onloadend = async () => {
+                const base64Audio = reader.result as string;
 
-            if(result.tokensUsed) {
-                addTokens(result.tokensUsed);
-            }
+                const result = await generateInterviewFeedback({
+                    question: question.question,
+                    answerAudio: base64Audio,
+                });
 
-            setFeedback(result);
-            
-            // Save the result to Firestore
-            await addInterviewAnswer(user.uid, {
-                id: `${user.uid}-${question.id}-${Date.now()}`,
-                questionId: question.id,
-                question: question.question,
-                answer: data.answer,
-                feedback: result,
-                createdAt: Date.now(),
-            });
+                if (result.tokensUsed) {
+                    addTokens(result.tokensUsed);
+                }
 
-            toast({
-                title: 'Feedback Generated!',
-                description: 'Your AI-powered feedback is ready and saved to your history.',
-            });
+                setFeedback(result);
+
+                await addInterviewAnswer(user.uid, {
+                    id: `${user.uid}-${question.id}-${Date.now()}`,
+                    questionId: question.id,
+                    question: question.question,
+                    answer: result.transcript, // Save transcript as the answer
+                    feedback: result,
+                    createdAt: Date.now(),
+                    transcript: result.transcript,
+                });
+
+                toast({
+                    title: 'Feedback Generated!',
+                    description: 'Your AI-powered feedback is ready and saved to your history.',
+                });
+
+                setIsGenerating(false);
+            };
         } catch (error) {
             console.error('Failed to generate feedback', error);
             toast({
@@ -85,7 +83,6 @@ export default function QuestionPracticePage() {
                 title: 'Error Generating Feedback',
                 description: 'There was a problem. Please try again.',
             });
-        } finally {
             setIsGenerating(false);
         }
     };
@@ -93,6 +90,12 @@ export default function QuestionPracticePage() {
     if (!question) {
         return <div className="text-center p-8">Question not found.</div>;
     }
+    
+    const formatTime = (seconds: number) => {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    };
 
     return (
         <div className="container mx-auto max-w-4xl py-12 px-4">
@@ -100,40 +103,40 @@ export default function QuestionPracticePage() {
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl">{question.question}</CardTitle>
                     <CardDescription className="text-lg pt-2">
-                        Practice your answer below. When you're ready, submit it for AI-powered feedback.
+                        Practice your answer by recording it below. When you're ready, submit it for AI-powered feedback.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField
-                                control={form.control}
-                                name="answer"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Your Answer</FormLabel>
-                                        <FormControl>
-                                            <Textarea rows={10} placeholder="Type your response here..." {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <Button type="submit" disabled={isGenerating}>
-                                {isGenerating ? (
-                                    <>
-                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Generating Feedback...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="mr-2 h-4 w-4" />
-                                        Get Feedback
-                                    </>
-                                )}
+                <CardContent className="space-y-6">
+                    <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg bg-secondary/30 border">
+                        {!isRecording ? (
+                            <Button onClick={startRecording} size="lg" className="h-16 w-16 rounded-full">
+                                <Mic className="h-8 w-8" />
                             </Button>
-                        </form>
-                    </Form>
+                        ) : (
+                             <Button onClick={stopRecording} variant="destructive" size="lg" className="h-16 w-16 rounded-full">
+                                <Square className="h-8 w-8" />
+                            </Button>
+                        )}
+                        <div className="text-2xl font-mono font-bold">
+                            {formatTime(recordingTime)}
+                        </div>
+                        <p className="text-muted-foreground">
+                            {isRecording ? 'Recording in progress...' : (audioBlob ? 'Ready to submit' : 'Click to start recording')}
+                        </p>
+                    </div>
+                    <Button onClick={handleSubmit} disabled={isGenerating || isRecording || !audioBlob}>
+                        {isGenerating ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Generating Feedback...
+                            </>
+                        ) : (
+                            <>
+                                <Sparkles className="mr-2 h-4 w-4" />
+                                Get Feedback
+                            </>
+                        )}
+                    </Button>
                 </CardContent>
             </Card>
 
@@ -174,7 +177,7 @@ export default function QuestionPracticePage() {
                             <div className="flex justify-between items-center">
                                 <CardTitle className="font-headline text-2xl flex items-center gap-2">
                                     <Wand2 />
-                                    Feedback
+                                    Feedback & Transcript
                                 </CardTitle>
                                 <TooltipProvider>
                                     <div className="flex gap-2">
@@ -186,20 +189,25 @@ export default function QuestionPracticePage() {
                                                 <p>{question.question}</p>
                                             </TooltipContent>
                                         </Tooltip>
-                                         <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button variant="outline" size="sm">Response</Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent className="max-w-xs">
-                                                 <p>{lastAnswer}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
                                     </div>
                                 </TooltipProvider>
                             </div>
                         </CardHeader>
-                        <CardContent className="prose dark:prose-invert max-w-none">
-                             <ReactMarkdown>{feedback.feedback}</ReactMarkdown>
+                        <CardContent>
+                             <Accordion type="single" collapsible className="w-full">
+                                <AccordionItem value="feedback">
+                                    <AccordionTrigger>View Detailed Feedback</AccordionTrigger>
+                                    <AccordionContent className="prose dark:prose-invert max-w-none">
+                                        <ReactMarkdown>{feedback.feedback}</ReactMarkdown>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="transcript">
+                                    <AccordionTrigger>View Transcript</AccordionTrigger>
+                                    <AccordionContent className="prose dark:prose-invert max-w-none">
+                                        <p>{feedback.transcript}</p>
+                                    </AccordionContent>
+                                </AccordionItem>
+                             </Accordion>
                         </CardContent>
                     </Card>
                 </div>
@@ -207,3 +215,4 @@ export default function QuestionPracticePage() {
         </div>
     );
 }
+

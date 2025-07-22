@@ -63,9 +63,9 @@ export default function AnsweredQuestionsPage() {
                             <CardContent>
                                 <Accordion type="single" collapsible className="w-full">
                                     <AccordionItem value="item-1">
-                                        <AccordionTrigger>Your Answer</AccordionTrigger>
+                                        <AccordionTrigger>Your Answer (Transcript)</AccordionTrigger>
                                         <AccordionContent className="prose dark:prose-invert max-w-none">
-                                            <p>{answer.answer}</p>
+                                            <p>{answer.transcript || answer.answer}</p>
                                         </AccordionContent>
                                     </AccordionItem>
                                     <AccordionItem value="item-2">

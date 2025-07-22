@@ -69,4 +69,5 @@ export interface InterviewAnswer {
   answer: string;
   feedback: GenerateInterviewFeedbackOutput;
   createdAt: number; // Timestamp
+  transcript?: string;
 }

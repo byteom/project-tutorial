@@ -2,7 +2,7 @@
 'use server';
 
 /**
- * @fileOverview A flow to generate feedback on an interview answer.
+ * @fileOverview A flow to generate feedback on an interview answer, including audio analysis.
  *
  * - generateInterviewFeedback - A function that handles the feedback generation.
  * - GenerateInterviewFeedbackInput - The input type for the function.
@@ -14,24 +14,25 @@ import { z } from 'zod';
 
 const GenerateInterviewFeedbackInputSchema = z.object({
   question: z.string().describe("The interview question that was asked."),
-  answer: z.string().describe("The user's answer to the question."),
+  answerAudio: z.string().describe("The user's answer recorded as an audio data URI."),
 });
 export type GenerateInterviewFeedbackInput = z.infer<typeof GenerateInterviewFeedbackInputSchema>;
 
 const AnalysisCriteriaSchema = z.object({
-  rating: z.string().describe("The rating for this criterion (e.g., 'Below Average', 'Average', 'Good', 'Excellent')."),
+  rating: z.string().describe("The rating for this criterion (e.g., 'Needs Improvement', 'Average', 'Good', 'Excellent')."),
   reason: z.string().describe("A brief, one-sentence justification for the rating."),
 });
 
 const GenerateInterviewFeedbackOutputSchema = z.object({
   feedback: z.string().describe('Detailed, constructive feedback on the user\'s answer, formatted in Markdown. It should analyze the answer\'s structure, clarity, and content, and provide specific suggestions for improvement.'),
-  score: z.number().min(0).max(100).describe('A score from 0 to 100 representing the quality of the answer.'),
+  score: z.number().min(0).max(100).describe('A score from 0 to 100 representing the overall quality of the answer, considering both content and delivery.'),
+  transcript: z.string().describe("The full transcript of the user's spoken answer."),
   analysis: z.object({
-    responseQuality: AnalysisCriteriaSchema,
-    clarity: AnalysisCriteriaSchema,
-    criticalThinking: AnalysisCriteriaSchema,
-    relevance: AnalysisCriteriaSchema,
-    thoroughness: AnalysisCriteriaSchema,
+    clarity: AnalysisCriteriaSchema.describe("How clear and easy to understand the answer was."),
+    relevance: AnalysisCriteriaSchema.describe("How well the answer addressed the question."),
+    fillerWords: AnalysisCriteriaSchema.describe("Analysis of the use of filler words like 'um', 'ah', 'like'. A lower frequency is better."),
+    pacing: AnalysisCriteriaSchema.describe("Analysis of the speaking pace. Was it too fast, too slow, or just right?"),
+    confidence: AnalysisCriteriaSchema.describe("Analysis of the perceived confidence based on tone and speech patterns."),
   }).describe('A detailed analysis of the user\'s answer across multiple criteria.'),
   tokensUsed: z.number().optional().describe('The number of tokens used to generate the feedback.'),
 });
@@ -48,32 +49,33 @@ const prompt = ai.definePrompt({
   name: 'generateInterviewFeedbackPrompt',
   input: { schema: GenerateInterviewFeedbackInputSchema },
   output: { schema: GenerateInterviewFeedbackOutputSchema },
-  prompt: `You are an expert career coach and interview trainer. Your task is to provide high-quality, constructive feedback on a user's answer to an interview question.
+  prompt: `You are a world-class interview and speech coach. Your task is to provide high-quality, constructive feedback on a user's spoken answer to an interview question. You will receive an audio file of the user's response.
 
 **Interview Question:**
 ---
 {{{question}}}
 ---
 
-**User's Answer:**
+**User's Spoken Answer (Audio):**
 ---
-{{{answer}}}
+{{media url=answerAudio}}
 ---
 
 **Instructions:**
-1.  **Analyze the Answer:** Carefully evaluate the user's answer based on the following criteria:
-    *   **Response Quality:** Overall effectiveness and correctness of the response.
-    *   **Clarity:** Is the answer well-organized and easy to follow?
-    *   **Critical Thinking:** Does the answer demonstrate analytical skills and problem-solving?
-    *   **Relevance:** Does the answer directly address the question asked?
-    *   **Thoroughness:** Does the answer provide sufficient detail and examples?
-2.  **Provide Structured Analysis:** For each of the criteria above, provide a rating ('Below Average', 'Average', 'Good', 'Excellent') and a brief, one-sentence reason for that rating.
-3.  **Provide Detailed Feedback:** Write comprehensive feedback in Markdown format. The feedback should be encouraging and actionable.
-    *   Start with a positive point.
-    *   Identify specific areas for improvement.
-    *   Provide concrete examples of how the user could rephrase or restructure parts of their answer.
-    *   Offer a revised, improved version of the answer as an example.
-4.  **Assign a Score:** Give a score from 0 to 100 that reflects the overall quality of the user's answer. This score should be consistent with your analysis ratings.
+1.  **Transcribe the Audio:** First, accurately transcribe the user's spoken answer from the audio file. The full transcript must be included in the 'transcript' output field.
+2.  **Analyze the Content (from Transcript):** Based on your transcription, evaluate the substance of the answer.
+    *   **Clarity:** Is the answer well-organized, logical, and easy to follow?
+    *   **Relevance:** Does the answer directly and effectively address the question asked?
+3.  **Analyze the Delivery (from Audio):** Listen to the audio to evaluate the user's delivery.
+    *   **Filler Words:** Identify the frequency and impact of filler words (e.g., "um," "ah," "uh," "like," "you know"). A great answer has very few.
+    *   **Pacing:** Was the speaking pace appropriate? Was it too fast, making it hard to follow? Or too slow, sounding hesitant?
+    *   **Confidence:** Assess the user's confidence from their tone, pace, and avoidance of hesitation.
+4.  **Provide Structured Analysis:** For each of the analysis criteria (Clarity, Relevance, Filler Words, Pacing, Confidence), provide a rating ('Needs Improvement', 'Average', 'Good', 'Excellent') and a brief, one-sentence reason for that rating.
+5.  **Provide Detailed Feedback:** Write comprehensive feedback in Markdown format. Be encouraging and actionable.
+    *   Start with a positive point about their content or delivery.
+    *   Identify specific areas for improvement, quoting from the transcript where helpful.
+    *   Provide concrete examples of how the user could rephrase parts of their answer or improve their delivery.
+6.  **Assign a Score:** Give an overall score from 0 to 100, considering both the content of the answer and the quality of the delivery.
 `,
 });
 
