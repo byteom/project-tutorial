@@ -23,6 +23,7 @@ export type GenerateStepContentInput = z.infer<typeof GenerateStepContentInputSc
 
 const GenerateStepContentOutputSchema = z.object({
   content: z.string().describe('The detailed, well-structured Markdown content for the sub-task. All code snippets must be in fenced code blocks with language identifiers.'),
+  tokensUsed: z.number().optional().describe('The number of tokens used to generate the content.'),
 });
 export type GenerateStepContentOutput = z.infer<typeof GenerateStepContentOutputSchema>;
 
@@ -67,7 +68,13 @@ const generateStepContentFlow = ai.defineFlow(
     outputSchema: GenerateStepContentOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    const result = await prompt(input);
+    const usage = result.usage;
+    const tokensUsed = (usage?.inputTokens || 0) + (usage?.outputTokens || 0);
+
+    return {
+      content: result.output!.content,
+      tokensUsed: tokensUsed,
+    };
   }
 );

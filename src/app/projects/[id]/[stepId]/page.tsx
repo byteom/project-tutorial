@@ -25,6 +25,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useTokenUsage } from "@/hooks/use-token-usage";
 
 
 export default function ProjectStepPage() {
@@ -32,6 +33,7 @@ export default function ProjectStepPage() {
   const { id: projectId, stepId } = params;
   const { projects, updateProject, isLoading: projectsLoading } = useProjects();
   const { toast } = useToast();
+  const { addTokens } = useTokenUsage();
 
   const [project, setProject] = useState<Project | null>(null);
   const [step, setStep] = useState<TutorialStep | null>(null);
@@ -71,6 +73,10 @@ export default function ProjectStepPage() {
         fullOutline: fullOutline,
       });
 
+      if (result.tokensUsed) {
+        addTokens(result.tokensUsed);
+      }
+
       const updatedSubTask = { ...subTask, content: result.content };
       
       const updatedProject = {
@@ -96,7 +102,7 @@ export default function ProjectStepPage() {
     } finally {
       setIsGeneratingContent(false);
     }
-  }, [project, step, updateProject, toast]);
+  }, [project, step, updateProject, toast, addTokens]);
 
 
   useEffect(() => {
@@ -336,6 +342,7 @@ function PersonalizedAssistance({ context }: { context: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [assistance, setAssistance] = useState<PersonalizedAssistanceOutput | null>(null);
   const { toast } = useToast();
+  const { addTokens } = useTokenUsage();
 
   const form = useForm<z.infer<typeof assistanceFormSchema>>({
     resolver: zodResolver(assistanceFormSchema),
@@ -351,6 +358,9 @@ function PersonalizedAssistance({ context }: { context: string }) {
         userProgress: values.question,
         userCode: values.userCode,
       });
+      if (result.tokensUsed) {
+        addTokens(result.tokensUsed);
+      }
       setAssistance(result);
     } catch (error) {
       console.error(error);

@@ -32,6 +32,7 @@ const PersonalizedAssistanceOutputSchema = z.object({
     .describe(
       'A helpful message formatted in Markdown that provides guidance and support to the user based on their question and the tutorial context.'
     ),
+  tokensUsed: z.number().optional().describe('The number of tokens used for this assistance.'),
 });
 export type PersonalizedAssistanceOutput = z.infer<
   typeof PersonalizedAssistanceOutputSchema
@@ -93,7 +94,13 @@ const personalizedAssistanceFlow = ai.defineFlow(
         outputSchema: PersonalizedAssistanceOutputSchema,
     },
     async (input) => {
-        const { output } = await prompt(input);
-        return output!;
+        const result = await prompt(input);
+        const usage = result.usage;
+        const tokensUsed = (usage?.inputTokens || 0) + (usage?.outputTokens || 0);
+
+        return {
+          assistanceMessage: result.output!.assistanceMessage,
+          tokensUsed: tokensUsed,
+        };
     }
 );

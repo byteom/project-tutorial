@@ -38,7 +38,8 @@ const GenerateTutorialOutputSchema = z.object({
   description: z.string().describe('A short, one-paragraph description of the entire project.'),
   steps: z.array(TutorialStepSchema).describe('An array of tutorial steps.'),
   tags: z.array(z.string()).describe("A list of relevant tags for the project, such as programming language (e.g., 'C++'), frameworks (e.g., 'React'), and difficulty level ('Easy', 'Medium', 'Hard')."),
-  progress: z.string().describe('A short summary of the generated tutorial.')
+  progress: z.string().describe('A short summary of the generated tutorial.'),
+  tokensUsed: z.number().optional().describe('The number of tokens used to generate the tutorial.'),
 });
 export type GenerateTutorialOutput = z.infer<typeof GenerateTutorialOutputSchema>;
 
@@ -78,9 +79,12 @@ const generateTutorialFlow = ai.defineFlow(
     outputSchema: GenerateTutorialOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const result = await prompt(input);
+    const usage = result.usage;
+    const tokensUsed = (usage?.inputTokens || 0) + (usage?.outputTokens || 0);
     return {
-      ...output!,
+      ...result.output!,
+      tokensUsed: tokensUsed,
       progress: 'Generated a tutorial from the given prompt.'
     };
   }

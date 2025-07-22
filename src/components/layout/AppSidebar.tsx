@@ -17,9 +17,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw } from 'lucide-react';
+import { useTokenUsage } from '@/hooks/use-token-usage';
 
 export function AppSidebar() {
+
+  const { tokenCount, resetTokens } = useTokenUsage();
 
   const topTracks = [
     { name: "Web Development", icon: <Code /> },
@@ -56,6 +59,22 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
+
+            <SidebarGroup className="mt-4">
+                <SidebarGroupLabel>Usage</SidebarGroupLabel>
+                 <div className="flex items-center justify-between p-2 text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                        <ToyBrick className="h-4 w-4" />
+                        <span>Tokens Used</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-sm font-bold">{tokenCount.toLocaleString()}</span>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => resetTokens()}>
+                          <RefreshCcw className="h-3 w-3" />
+                      </Button>
+                    </div>
+                </div>
+            </SidebarGroup>
 
             <SidebarGroup className="mt-4">
                 <SidebarGroupLabel>Top Tracks</SidebarGroupLabel>
