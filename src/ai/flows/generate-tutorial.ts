@@ -18,8 +18,23 @@ const GenerateTutorialInputSchema = z.object({
 });
 export type GenerateTutorialInput = z.infer<typeof GenerateTutorialInputSchema>;
 
+const SubTaskSchema = z.object({
+    id: z.string().describe("A unique ID for the sub-task (e.g., 'subtask-1')."),
+    title: z.string().describe('The title of the sub-task.'),
+});
+
+const TutorialStepSchema = z.object({
+    id: z.string().describe("A unique ID for the step (e.g., 'step-1')."),
+    title: z.string().describe('The title of the tutorial step.'),
+    description: z.string().describe('A short, one-paragraph description of what this step covers.'),
+    content: z.string().describe('The detailed, well-structured Markdown content for the entire step. All code snippets must be in fenced code blocks with language identifiers.'),
+    subTasks: z.array(SubTaskSchema).describe('A list of specific, actionable sub-tasks for this step.'),
+});
+
 const GenerateTutorialOutputSchema = z.object({
-  tutorial: z.string().describe('The generated tutorial.'),
+  title: z.string().describe('The main title of the overall tutorial.'),
+  description: z.string().describe('A short, one-paragraph description of the entire project.'),
+  steps: z.array(TutorialStepSchema).describe('An array of tutorial steps.'),
   progress: z.string().describe('A short summary of the generated tutorial.')
 });
 export type GenerateTutorialOutput = z.infer<typeof GenerateTutorialOutputSchema>;
@@ -36,10 +51,11 @@ const prompt = ai.definePrompt({
 The tutorial should be well-structured and use Markdown for formatting.
 
 Your response must follow these rules:
-1.  The very first line must be a single H1 heading for the project title (e.g., '# My Awesome Tutorial').
-2.  After the title, provide a short, one-paragraph description of the project.
-3.  The rest of the content must be a series of steps. Each step must start with an H2 heading (e.g., '## Step 1: Setting up').
-4.  All code snippets must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash). Do not include the filename inside the code block fence.
+1.  Generate a main title and a short, one-paragraph description for the entire project.
+2.  Break the tutorial down into a series of distinct steps.
+3.  For each step, provide a title, a short description, and a list of specific, actionable sub-tasks.
+4.  The 'content' for each step must contain all the detailed explanations and code for that step.
+5.  All code snippets in the 'content' field must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash). Do not include the filename inside the code block fence.
 
 Prompt: {{{prompt}}}`,
 });

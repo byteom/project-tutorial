@@ -1,7 +1,15 @@
+export interface SubTask {
+    id: string;
+    title: string;
+    completed: boolean;
+}
+
 export interface TutorialStep {
-  id: string;
+  id:string;
   title: string;
+  description: string;
   content: string;
+  subTasks: SubTask[];
   completed: boolean;
 }
 
