@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 export function useAudioRecorder() {
     const [isRecording, setIsRecording] = useState(false);
@@ -16,10 +16,16 @@ export function useAudioRecorder() {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
             }
+            // Stop media tracks when component unmounts
+            if (mediaRecorderRef.current?.stream) {
+                 mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+            }
         };
     }, []);
 
     const startRecording = async () => {
+        // Reset previous recording state
+        resetRecording();
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorderRef.current = new MediaRecorder(stream);
@@ -32,7 +38,7 @@ export function useAudioRecorder() {
             mediaRecorderRef.current.onstop = () => {
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
                 setAudioBlob(audioBlob);
-                stream.getTracks().forEach(track => track.stop()); // Stop the microphone access
+                stream.getTracks().forEach(track => track.stop()); // Stop the microphone access after recording
             };
 
             mediaRecorderRef.current.start();
@@ -56,11 +62,23 @@ export function useAudioRecorder() {
         }
     };
 
+    const resetRecording = useCallback(() => {
+        setAudioBlob(null);
+        setRecordingTime(0);
+        setIsRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+        }
+        audioChunksRef.current = [];
+    }, []);
+
     return {
         isRecording,
         recordingTime,
         audioBlob,
         startRecording,
         stopRecording,
+        resetRecording,
     };
 }

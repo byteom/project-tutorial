@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { interviewQuestions } from '@/lib/interview-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Sparkles, Wand2, Mic, Square, Circle } from 'lucide-react';
+import { Loader2, Sparkles, Wand2, Mic, Square, FileText } from 'lucide-react';
 import { generateInterviewFeedback, GenerateInterviewFeedbackOutput } from '@/ai/flows/generate-interview-feedback';
 import { useToast } from '@/hooks/use-toast';
 import { useTokenUsage } from '@/hooks/use-token-usage';
@@ -17,6 +17,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { addInterviewAnswer } from '@/lib/firestore-interview-answers';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function QuestionPracticePage() {
     const params = useParams();
@@ -25,57 +27,72 @@ export default function QuestionPracticePage() {
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [feedback, setFeedback] = useState<GenerateInterviewFeedbackOutput | null>(null);
+    const [mode, setMode] = useState<'audio' | 'text'>('audio');
+    const [textAnswer, setTextAnswer] = useState('');
+
     const { toast } = useToast();
     const { addTokens } = useTokenUsage();
-    const { startRecording, stopRecording, isRecording, recordingTime, audioBlob } = useAudioRecorder();
+    const { startRecording, stopRecording, isRecording, recordingTime, audioBlob, resetRecording } = useAudioRecorder();
 
     const handleSubmit = async () => {
-        if (!question || !user || !audioBlob) {
-            toast({
-                variant: 'destructive',
-                title: 'No Audio Recorded',
-                description: 'Please record your answer before submitting.',
-            });
-            return;
-        }
-
-        setIsGenerating(true);
-        setFeedback(null);
-
-        try {
+        if (!question || !user) return;
+        
+        let inputData;
+        if (mode === 'audio') {
+            if (!audioBlob) {
+                toast({
+                    variant: 'destructive',
+                    title: 'No Audio Recorded',
+                    description: 'Please record your answer before submitting.',
+                });
+                return;
+            }
             const reader = new FileReader();
             reader.readAsDataURL(audioBlob);
-            reader.onloadend = async () => {
+            reader.onloadend = () => {
                 const base64Audio = reader.result as string;
-
-                const result = await generateInterviewFeedback({
-                    question: question.question,
-                    answerAudio: base64Audio,
-                });
-
-                if (result.tokensUsed) {
-                    addTokens(result.tokensUsed);
-                }
-
-                setFeedback(result);
-
-                await addInterviewAnswer(user.uid, {
-                    id: `${user.uid}-${question.id}-${Date.now()}`,
-                    questionId: question.id,
-                    question: question.question,
-                    answer: result.transcript, // Save transcript as the answer
-                    feedback: result,
-                    createdAt: Date.now(),
-                    transcript: result.transcript,
-                });
-
-                toast({
-                    title: 'Feedback Generated!',
-                    description: 'Your AI-powered feedback is ready and saved to your history.',
-                });
-
-                setIsGenerating(false);
+                generateFeedback({ question: question.question, answerAudio: base64Audio });
             };
+        } else {
+             if (!textAnswer.trim()) {
+                toast({
+                    variant: 'destructive',
+                    title: 'No Answer Provided',
+                    description: 'Please type your answer before submitting.',
+                });
+                return;
+            }
+            generateFeedback({ question: question.question, answerText: textAnswer });
+        }
+    };
+
+    const generateFeedback = async (payload: { question: string, answerAudio?: string, answerText?: string }) => {
+        setIsGenerating(true);
+        setFeedback(null);
+        try {
+            const result = await generateInterviewFeedback(payload);
+
+            if (result.tokensUsed) {
+                addTokens(result.tokensUsed);
+            }
+
+            setFeedback(result);
+
+            await addInterviewAnswer(user!.uid, {
+                id: `${user!.uid}-${question!.id}-${Date.now()}`,
+                questionId: question!.id,
+                question: question!.question,
+                answer: result.transcript,
+                feedback: result,
+                createdAt: Date.now(),
+                transcript: result.transcript,
+            });
+
+            toast({
+                title: 'Feedback Generated!',
+                description: 'Your AI-powered feedback is ready and saved to your history.',
+            });
+
         } catch (error) {
             console.error('Failed to generate feedback', error);
             toast({
@@ -83,7 +100,11 @@ export default function QuestionPracticePage() {
                 title: 'Error Generating Feedback',
                 description: 'There was a problem. Please try again.',
             });
+        } finally {
             setIsGenerating(false);
+            // Reset state after submission
+            resetRecording();
+            setTextAnswer('');
         }
     };
     
@@ -97,34 +118,56 @@ export default function QuestionPracticePage() {
         return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 
+    const isSubmitDisabled = isGenerating || 
+      (mode === 'audio' && (isRecording || !audioBlob)) || 
+      (mode === 'text' && !textAnswer.trim());
+
     return (
         <div className="container mx-auto max-w-4xl py-12 px-4">
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline text-3xl">{question.question}</CardTitle>
                     <CardDescription className="text-lg pt-2">
-                        Practice your answer by recording it below. When you're ready, submit it for AI-powered feedback.
+                        Practice your answer by recording it or typing it out below. When you're ready, submit it for AI-powered feedback.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                    <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg bg-secondary/30 border">
-                        {!isRecording ? (
-                            <Button onClick={startRecording} size="lg" className="h-16 w-16 rounded-full">
-                                <Mic className="h-8 w-8" />
-                            </Button>
-                        ) : (
-                             <Button onClick={stopRecording} variant="destructive" size="lg" className="h-16 w-16 rounded-full">
-                                <Square className="h-8 w-8" />
-                            </Button>
-                        )}
-                        <div className="text-2xl font-mono font-bold">
-                            {formatTime(recordingTime)}
-                        </div>
-                        <p className="text-muted-foreground">
-                            {isRecording ? 'Recording in progress...' : (audioBlob ? 'Ready to submit' : 'Click to start recording')}
-                        </p>
-                    </div>
-                    <Button onClick={handleSubmit} disabled={isGenerating || isRecording || !audioBlob}>
+                    <Tabs value={mode} onValueChange={(value) => setMode(value as 'audio' | 'text')} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="audio"><Mic className="mr-2 h-4 w-4" /> Speak</TabsTrigger>
+                            <TabsTrigger value="text"><FileText className="mr-2 h-4 w-4" /> Write</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="audio">
+                             <div className="flex flex-col items-center justify-center gap-4 p-8 rounded-lg bg-secondary/30 border mt-4">
+                                {!isRecording ? (
+                                    <Button onClick={startRecording} size="lg" className="h-16 w-16 rounded-full" disabled={isGenerating}>
+                                        <Mic className="h-8 w-8" />
+                                    </Button>
+                                ) : (
+                                    <Button onClick={stopRecording} variant="destructive" size="lg" className="h-16 w-16 rounded-full">
+                                        <Square className="h-8 w-8" />
+                                    </Button>
+                                )}
+                                <div className="text-2xl font-mono font-bold">
+                                    {formatTime(recordingTime)}
+                                </div>
+                                <p className="text-muted-foreground">
+                                    {isRecording ? 'Recording in progress...' : (audioBlob ? 'Ready to submit' : 'Click to start recording')}
+                                </p>
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="text">
+                            <Textarea
+                                value={textAnswer}
+                                onChange={(e) => setTextAnswer(e.target.value)}
+                                placeholder="Type your answer here..."
+                                rows={8}
+                                className="mt-4"
+                                disabled={isGenerating}
+                            />
+                        </TabsContent>
+                    </Tabs>
+                    <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
                         {isGenerating ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -194,7 +237,7 @@ export default function QuestionPracticePage() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                             <Accordion type="single" collapsible className="w-full">
+                             <Accordion type="single" collapsible className="w-full" defaultValue="feedback">
                                 <AccordionItem value="feedback">
                                     <AccordionTrigger>View Detailed Feedback</AccordionTrigger>
                                     <AccordionContent className="prose dark:prose-invert max-w-none">
@@ -215,4 +258,3 @@ export default function QuestionPracticePage() {
         </div>
     );
 }
-
