@@ -1,0 +1,97 @@
+
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarGroup,
+  SidebarGroupLabel
+} from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '../ui/button';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown } from 'lucide-react';
+
+export function AppSidebar() {
+
+  const topTracks = [
+    { name: "Web Development", icon: <Code /> },
+    { name: "Full-Stack SpringBoot", icon: <GitBranch /> },
+    { name: "Machine Learning", icon: <FlaskConical /> },
+    { name: "React & Node.js", icon: <Code /> },
+    { name: "C++", icon: <Code /> },
+    { name: "Python", icon: <Code /> },
+  ]
+
+  return (
+    <Sidebar>
+        <SidebarHeader>
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-primary">
+                    <Cpu />
+                </Button>
+                <span className="font-bold font-headline text-lg">PROJECTAI</span>
+            </div>
+        </SidebarHeader>
+        <SidebarContent className="p-2">
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton href="/" isActive>
+                        <LayoutDashboard />
+                        Projects
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                    <SidebarMenuButton href="#">
+                        <BotMessageSquare />
+                        Learn Anything
+                        <Badge variant="secondary" className="ml-auto">BETA</Badge>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+
+            <SidebarGroup className="mt-4">
+                <SidebarGroupLabel>Top Tracks</SidebarGroupLabel>
+                <SidebarMenu>
+                    {topTracks.map((track) => (
+                        <SidebarMenuItem key={track.name}>
+                            <SidebarMenuButton href="#">
+                                {track.icon}
+                                {track.name}
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
+                    <SidebarMenuItem>
+                        <SidebarMenuButton href="#">
+                            <ChevronDown />
+                            Show All
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarGroup>
+        </SidebarContent>
+        <SidebarFooter className="p-2">
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-secondary">
+                 <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                    <AvatarFallback>OS</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                    <p className="text-sm font-semibold">Om singh</p>
+                </div>
+                <Button variant="default" size="sm" className='bg-primary/80 hover:bg-primary'>Upgrade</Button>
+            </div>
+             <p className='text-xs text-center text-muted-foreground pt-4'>
+                Made with ❤️ by @arpancodes
+            </p>
+        </SidebarFooter>
+    </Sidebar>
+  );
+}

@@ -3,7 +3,8 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
-import Header from "@/components/layout/Header";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const fontBody = Inter({
   subsets: ["latin"],
@@ -34,10 +35,14 @@ export default function RootLayout({
           fontHeadline.variable
         )}
       >
-        <div className="flex min-h-screen w-full flex-col">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full flex-col">
+            <div className="flex flex-1">
+              <AppSidebar />
+              <main className="flex-1 flex flex-col">{children}</main>
+            </div>
+          </div>
+        </SidebarProvider>
         <Toaster />
       </body>
     </html>
