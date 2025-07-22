@@ -16,6 +16,7 @@ import {z} from 'genkit';
 
 const GenerateTutorialInputSchema = z.object({
   prompt: z.string().describe('The prompt to generate a tutorial from.'),
+  difficulty: z.string().describe("The desired difficulty for the tutorial (e.g., 'Easy', 'Medium', 'Hard')."),
 });
 export type GenerateTutorialInput = z.infer<typeof GenerateTutorialInputSchema>;
 
@@ -49,17 +50,25 @@ const prompt = ai.definePrompt({
   name: 'generateTutorialPrompt',
   input: {schema: GenerateTutorialInputSchema},
   output: {schema: GenerateTutorialOutputSchema},
-  prompt: `You are an expert tutorial generator specializing in creating detailed, project-based learning guides for software developers. Your output should be structured, clear, and follow best practices for technical instruction.
+  prompt: `You are an expert tutorial generator specializing in creating detailed, comprehensive, project-based learning guides for software developers. Your output must be a robust and well-structured project outline.
 
-Your response must follow these rules:
+**Project Request:** {{{prompt}}}
+**Difficulty Level:** {{{difficulty}}}
+
+**Instructions:**
+Your task is to generate a complete project outline based on the user's prompt and the specified difficulty level. The goal is to break down a complex project into a large number of small, manageable, and actionable tasks. For a "Hard" project, you should aim for 100-150 total sub-tasks.
+
 1.  **Main Title and Description:** Generate a concise, descriptive main title and a one-paragraph summary for the entire project.
-2.  **High-Level Steps:** Break the tutorial into a series of logical, high-level steps (e.g., 'Project Setup', 'API Integration', 'UI Implementation'). Each step must have a title and a one-paragraph description.
-3.  **Granular Sub-Tasks:** For each step, create a list of specific, actionable sub-tasks. Each sub-task MUST have a unique ID, a descriptive title, and a single, informative sentence describing its purpose. The sub-task titles should be imperative (e.g., 'Create the Main Component', 'Implement the API Call').
-4.  **Tags:** Generate a list of relevant tags for the project. Include the primary programming language, any frameworks or major libraries, and a difficulty rating (Easy, Medium, or Hard).
+2.  **High-Level Steps:** Decompose the project into a series of logical, high-level steps (e.g., 'Project Setup', 'API Integration', 'UI Implementation', 'Database Design', 'Deployment'). Each step must have a title and a one-paragraph description.
+3.  **Granular Sub-Tasks:** This is the most critical part. For each high-level step, create a detailed list of specific, actionable sub-tasks.
+    *   The number and complexity of sub-tasks should directly correspond to the requested **difficulty level**.
+        *   **Easy:** Fewer steps, basic sub-tasks. Focus on the core concepts.
+        *   **Medium:** More steps, more detailed sub-tasks. Introduce more advanced concepts.
+        *   **Hard:** A large number of steps and a very high number of sub-tasks (aim for 100-150 total). Cover advanced topics, edge cases, testing, and best practices.
+    *   Each sub-task MUST have a unique ID, a descriptive title, and a single, informative sentence describing its purpose. The sub-task titles should be imperative (e.g., 'Create the Main Component', 'Implement the API Call').
+4.  **Tags:** Generate a list of relevant tags for the project. Include the primary programming language, any frameworks or major libraries, and the difficulty rating provided.
 
-**CRITICAL:** Do NOT generate the actual implementation code or detailed markdown content in this step. You are only creating the tutorial's high-level structure and outline.
-
-Prompt: {{{prompt}}}`,
+**CRITICAL:** Do NOT generate the actual implementation code or detailed markdown content in this step. You are only creating the tutorial's high-level structure and outline. The output must be exhaustive and detailed.`,
 });
 
 const generateTutorialFlow = ai.defineFlow(

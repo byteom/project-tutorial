@@ -13,10 +13,16 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import type { Project } from "@/lib/types";
 import { Sparkles, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
+
 
 const formSchema = z.object({
   prompt: z.string().min(10, {
     message: "Prompt must be at least 10 characters.",
+  }),
+  difficulty: z.string({
+    required_error: "Please select a difficulty level.",
   }),
 });
 
@@ -47,6 +53,8 @@ const parseTutorial = (output: GenerateTutorialOutput, prompt: string): Project 
 export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { prompt: "" },
@@ -55,7 +63,10 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
     try {
-      const result = await generateTutorial({ prompt: data.prompt });
+      const result = await generateTutorial({ 
+        prompt: data.prompt,
+        difficulty: data.difficulty,
+      });
       const newProject = parseTutorial(result, data.prompt);
       addProject(newProject);
       toast({
@@ -63,6 +74,7 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
         description: `Project "${newProject.title}" has been added.`,
       });
       form.reset();
+      router.push(`/projects/${newProject.id}`);
     } catch (error) {
       console.error("Failed to generate tutorial:", error);
       toast({
@@ -103,6 +115,28 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="difficulty"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Difficulty</FormLabel>
+                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a difficulty level" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Easy">Easy</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
