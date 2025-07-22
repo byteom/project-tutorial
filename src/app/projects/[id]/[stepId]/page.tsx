@@ -21,9 +21,11 @@ import { getPersonalizedAssistance } from "@/ai/flows/personalized-assistance";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Lightbulb, Loader2 } from "lucide-react";
+import { ArrowLeft, Lightbulb, Loader2, CheckCircle, Circle, Bot } from "lucide-react";
 import CodeBlock from "@/components/projects/CodeBlock";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const assistanceFormSchema = z.object({
   userProgress: z.string().min(10, "Please describe the problem in a bit more detail."),
@@ -89,42 +91,82 @@ export default function ProjectStepPage() {
         </div>
     );
   }
+  
+  const stepIndex = project.steps.findIndex(s => s.id === step.id);
+  const allSubTasksCompleted = step.subTasks.every(st => st.completed);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-       <div className="mb-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl">
+       <div className="mb-6">
         <Button variant="ghost" asChild>
             <Link href={`/projects/${project.id}`}><ArrowLeft className="mr-2 h-4 w-4" /> Back to Project Outline</Link>
         </Button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        <main className="md:col-span-2">
-            <header className="mb-8">
-                <h1 className="font-headline text-4xl font-bold">{step.title}</h1>
-                <p className="text-lg text-muted-foreground mt-2">{step.description}</p>
-            </header>
-            <Separator className="my-8" />
 
-            <div className="prose dark:prose-invert max-w-none">
-                 <ReactMarkdown
-                    rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
-                    components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
-                >
-                    {step.content}
-                </ReactMarkdown>
+      <header className="mb-8">
+        <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight">{step.title}</h1>
+        <p className="text-lg text-muted-foreground mt-2 max-w-4xl">{step.description}</p>
+        <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+                <Circle className="h-4 w-4 text-primary/80" />
+                <span>Step {stepIndex + 1}</span>
             </div>
-             <Separator className="my-8" />
-             <p className="text-muted-foreground">
-                This page is intended to contain the detailed documentation and code for the sub-tasks in this step.
-             </p>
-        </main>
-        <aside className="md:col-span-1">
-          <div className="sticky top-24 space-y-8">
-            <ChecklistCard step={step} onSubTaskToggle={handleSubTaskToggle} />
-            <PersonalizedAssistance currentStep={step} />
-          </div>
-        </aside>
-      </div>
+             <div className="flex items-center gap-2">
+                <Lightbulb className="h-4 w-4 text-primary/80" />
+                <span>Keywords: {step.subTasks.map(st => st.title.split(' ')[0]).slice(0, 3).join(', ')}</span>
+            </div>
+            {allSubTasksCompleted && (
+                <Badge variant="secondary" className="bg-green-500/10 text-green-400 border-green-500/20">
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Completed
+                </Badge>
+            )}
+        </div>
+      </header>
+
+      <Separator className="my-8 bg-border/50" />
+      
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="mb-6">
+            <TabsTrigger value="details">Task Details</TabsTrigger>
+            <TabsTrigger value="help">
+                Get Help 
+                <Badge variant="default" className="ml-2 !text-[10px] px-1.5 py-0.5 h-auto">NEW</Badge>
+            </TabsTrigger>
+        </TabsList>
+        <TabsContent value="details">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                <main className="lg:col-span-2">
+                   {allSubTasksCompleted && (
+                        <div className="flex items-center gap-2 p-3 rounded-md bg-green-500/10 text-green-400 mb-6">
+                            <CheckCircle className="h-5 w-5" />
+                            <p className="font-medium">You've completed this step!</p>
+                        </div>
+                    )}
+                    <Card className="bg-card/50">
+                        <CardContent className="p-8">
+                            <div className="prose dark:prose-invert max-w-none">
+                                <ReactMarkdown
+                                    rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
+                                    components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
+                                >
+                                    {step.content}
+                                </ReactMarkdown>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </main>
+                <aside className="lg:col-span-1">
+                    <div className="sticky top-24 space-y-8">
+                        <ChecklistCard step={step} onSubTaskToggle={handleSubTaskToggle} />
+                    </div>
+                </aside>
+            </div>
+        </TabsContent>
+        <TabsContent value="help">
+             <PersonalizedAssistance currentStep={step} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -152,16 +194,20 @@ function ChecklistCard({ step, onSubTaskToggle }: { step: TutorialStep, onSubTas
                 </div>
                 <div className="space-y-4">
                     {step.subTasks.map(subTask => (
-                        <div key={subTask.id} className="flex items-center gap-3">
+                        <div key={subTask.id} className="flex items-start gap-3">
                             <Checkbox
                                 id={`cb-${subTask.id}`}
                                 checked={subTask.completed}
                                 onCheckedChange={() => onSubTaskToggle(subTask.id)}
                                 aria-label={`Mark sub-task ${subTask.title} as complete`}
+                                className="mt-1"
                             />
-                            <label htmlFor={`cb-${subTask.id}`} className={`flex-1 text-sm ${subTask.completed ? 'line-through text-muted-foreground' : ''}`}>
-                                {subTask.title}
-                            </label>
+                            <div className="grid gap-1.5 leading-none">
+                                <label htmlFor={`cb-${subTask.id}`} className={`font-medium ${subTask.completed ? 'line-through text-muted-foreground' : ''}`}>
+                                    {subTask.title}
+                                </label>
+                                <p className="text-sm text-muted-foreground">{subTask.description}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -208,14 +254,14 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
     };
 
     return (
-        <Card>
+        <Card className="max-w-3xl">
             <CardHeader>
                 <CardTitle className="font-headline flex items-center gap-2">
-                    <Lightbulb className="text-primary"/>
+                    <Bot className="text-primary"/>
                     AI Assistant
                 </CardTitle>
                 <CardDescription>
-                   Struggling? Describe your problem below to get help.
+                   Struggling with this step? Describe your problem or question below to get targeted help from our AI assistant.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -224,21 +270,25 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
                         <FormField control={form.control} name="userProgress" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>What seems to be the problem?</FormLabel>
-                                <FormControl><Textarea placeholder="e.g., I'm getting an error when I try to..." {...field} rows={4} /></FormControl>
+                                <FormControl><Textarea placeholder="e.g., I'm getting an error when I try to run the server. Here's the error message..." {...field} rows={5} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}/>
-                        <Button type="submit" disabled={isLoading} className="w-full">
+                        <Button type="submit" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Get Help
                         </Button>
                     </form>
                 </Form>
                  {assistance && (
-                    <Alert className="mt-4">
-                        <Lightbulb className="h-4 w-4" />
-                        <AlertTitle>AI Assistant</AlertTitle>
-                        <AlertDescription>{assistance}</AlertDescription>
+                    <Alert className="mt-6">
+                        <Bot className="h-4 w-4" />
+                        <AlertTitle>AI Assistant's Response</AlertTitle>
+                        <AlertDescription>
+                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                                <ReactMarkdown>{assistance}</ReactMarkdown>
+                            </div>
+                        </AlertDescription>
                     </Alert>
                 )}
             </CardContent>
