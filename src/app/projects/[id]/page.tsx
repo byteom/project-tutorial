@@ -218,7 +218,7 @@ function PersonalizedAssistance({ currentStep }: { currentStep?: TutorialStep })
                         <Lightbulb className="h-4 w-4" />
                         <AlertTitle>AI Assistant</AlertTitle>
                         <AlertDescription>{assistance}</AlertDescription>
-                    </Aler
+                    </Alert>
                 )}
             </DialogContent>
         </Dialog>
