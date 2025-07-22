@@ -15,6 +15,7 @@ import { z } from 'zod';
 const GenerateLearningPathInputSchema = z.object({
   topic: z.string().describe("The topic the user wants to learn (e.g., 'C++', 'Python', 'React Native')."),
   difficulty: z.string().describe("The desired difficulty for the learning path (e.g., 'Easy', 'Medium', 'Hard')."),
+  operatingSystem: z.string().optional().describe("The user's operating system (e.g., 'Windows', 'macOS', 'Linux')."),
 });
 export type GenerateLearningPathInput = z.infer<typeof GenerateLearningPathInputSchema>;
 
@@ -59,6 +60,10 @@ Your task is to generate a well-structured learning path outline with modules an
 
 **Topic:** {{{topic}}}
 **Difficulty Level:** {{{difficulty}}}
+{{#if operatingSystem}}
+**Target Operating System:** {{{operatingSystem}}}
+**Instruction**: Your response should be tailored to the user's OS. For example, use appropriate command-line instructions (e.g., 'dir' for Windows, 'ls' for Linux/macOS).
+{{/if}}
 
 **Instructions:**
 1.  **ID**: Generate a unique ID for this learning path. It should be a slug-style string based on the topic and difficulty, like 'learn-react-basics-easy'.

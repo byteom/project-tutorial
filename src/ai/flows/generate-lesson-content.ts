@@ -17,6 +17,7 @@ const GenerateLessonContentInputSchema = z.object({
   moduleTitle: z.string().describe('The title of the current module.'),
   lessonTitle: z.string().describe('The title of the specific lesson to generate content for.'),
   fullOutline: z.string().describe('The full outline of the entire learning path for context.'),
+  operatingSystem: z.string().optional().describe("The user's operating system (e.g., 'Windows', 'macOS', 'Linux')."),
 });
 export type GenerateLessonContentInput = z.infer<typeof GenerateLessonContentInputSchema>;
 
@@ -48,6 +49,10 @@ Your task is to generate the detailed content for a single lesson within a large
 **Current Lesson:**
 - **Module:** {{{moduleTitle}}}
 - **Lesson:** {{{lessonTitle}}}
+{{#if operatingSystem}}
+**Target Operating System:** {{{operatingSystem}}}
+**Instruction**: Your response should be tailored to the user's OS. For example, use appropriate command-line instructions (e.g., 'dir' for Windows, 'ls' for Linux/macOS) and file path separators.
+{{/if}}
 
 **Instructions:**
 1.  Generate comprehensive, easy-to-follow content for the specified lesson.

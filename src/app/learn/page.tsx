@@ -22,6 +22,7 @@ import rehypePrism from "rehype-prism-plus";
 import CodeBlock from "@/components/projects/CodeBlock";
 import type { LearningPath, LearningModule, LearningLesson } from "@/lib/types";
 import { useLearningPaths } from "@/hooks/use-learning-paths";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 
 const formSchema = z.object({
   topic: z.string().min(2, {
@@ -38,6 +39,7 @@ export default function LearnAnythingPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { learningPaths, addLearningPath, deleteLearningPath, updateLearningPath, isLoading: isLoadingPaths } = useLearningPaths();
   const [activeLearningPath, setActiveLearningPath] = useState<LearningPath | null>(null);
+  const { operatingSystem } = useUserPreferences();
 
   const { toast } = useToast();
   const { addTokens } = useTokenUsage();
@@ -54,6 +56,7 @@ export default function LearnAnythingPage() {
       const result = await generateLearningPath({
         topic: data.topic,
         difficulty: data.difficulty,
+        operatingSystem: operatingSystem,
       });
 
       if (result.tokensUsed) {
@@ -106,6 +109,7 @@ export default function LearnAnythingPage() {
             moduleTitle: module.title,
             lessonTitle: lesson.title,
             fullOutline: fullOutline,
+            operatingSystem: operatingSystem,
         });
 
         if (result.tokensUsed) {
@@ -133,7 +137,7 @@ export default function LearnAnythingPage() {
             description: "There was a problem generating the lesson content. Please try again.",
         });
     }
-  }, [activeLearningPath, updateLearningPath, addTokens, toast]);
+  }, [activeLearningPath, updateLearningPath, addTokens, toast, operatingSystem]);
   
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4">

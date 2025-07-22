@@ -15,6 +15,7 @@ import {z} from 'genkit';
 const GenerateTutorialInputSchema = z.object({
   prompt: z.string().describe('The prompt to generate a tutorial from.'),
   difficulty: z.string().describe("The desired difficulty for the tutorial (e.g., 'Easy', 'Medium', 'Hard')."),
+  operatingSystem: z.string().optional().describe("The user's operating system (e.g., 'Windows', 'macOS', 'Linux')."),
 });
 export type GenerateTutorialInput = z.infer<typeof GenerateTutorialInputSchema>;
 
@@ -55,6 +56,10 @@ const prompt = ai.definePrompt({
 
 **Project Request:** {{{prompt}}}
 **Difficulty Level:** {{{difficulty}}}
+{{#if operatingSystem}}
+**Target Operating System:** {{{operatingSystem}}}
+**Instruction**: Your response must be tailored to the user's OS. For example, use appropriate command-line instructions (e.g., 'dir' for Windows, 'ls' for Linux/macOS) and file path separators.
+{{/if}}
 
 **Instructions:**
 Your task is to generate a complete project outline based on the user's prompt and the specified difficulty level. The goal is to break down a complex project into a large number of small, manageable, and actionable tasks. For a "Hard" project, you should aim for 100-150 total sub-tasks.

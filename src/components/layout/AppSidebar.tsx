@@ -18,18 +18,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useProjects } from '@/hooks/use-projects';
 import { Input } from '../ui/input';
 import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { useUserPreferences, OperatingSystem } from '@/hooks/use-user-preferences';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 export function AppSidebar() {
   const { tokenCount } = useTokenUsage();
   const { projects } = useProjects();
   const { toast } = useToast();
   const pathname = usePathname();
+  const { operatingSystem, setOS } = useUserPreferences();
+
 
   // Gemini API Key logic
   const GEMINI_KEY_STORAGE = 'projectai_gemini_api_key';
@@ -166,6 +170,25 @@ export function AppSidebar() {
             </div>
 
             <div className="mt-auto">
+                 <SidebarGroup>
+                    <SidebarGroupLabel className="flex items-center gap-2">
+                        <Laptop />
+                        Preferences
+                    </SidebarGroupLabel>
+                    <div className="p-2 text-sm">
+                        <Select onValueChange={(value) => setOS(value as OperatingSystem)} value={operatingSystem}>
+                            <SelectTrigger className="h-9">
+                                <SelectValue placeholder="Select OS" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Windows">Windows</SelectItem>
+                                <SelectItem value="macOS">macOS</SelectItem>
+                                <SelectItem value="Linux">Linux</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </SidebarGroup>
+
                 <SidebarGroup>
                     <SidebarGroupLabel>Usage</SidebarGroupLabel>
                     <div className="flex items-center justify-between p-2 text-sm">

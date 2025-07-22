@@ -16,6 +16,7 @@ import { Sparkles, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { useTokenUsage } from "@/hooks/use-token-usage";
+import { useUserPreferences } from "@/hooks/use-user-preferences";
 
 
 const formSchema = z.object({
@@ -58,6 +59,7 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
   const { toast } = useToast();
   const router = useRouter();
   const { addTokens } = useTokenUsage();
+  const { operatingSystem } = useUserPreferences();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -70,6 +72,7 @@ export function GenerateTutorialForm({ addProject }: GenerateTutorialFormProps) 
       const result = await generateTutorial({ 
         prompt: data.prompt,
         difficulty: data.difficulty,
+        operatingSystem: operatingSystem,
       });
 
       if (result.tokensUsed) {
