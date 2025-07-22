@@ -1,12 +1,14 @@
 
 'use client'
 
+import { useState, useEffect } from "react";
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, BadgeCheck, CheckCircle, FileQuestion, MessageSquareHeart, Users } from "lucide-react";
+import { ArrowRight, BadgeCheck, CheckCircle, FileQuestion, Loader2, MessageSquareHeart, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from 'next/link';
-import { interviewQuestions } from "@/lib/interview-data";
 import { Button } from "@/components/ui/button";
+import { getInterviewQuestions } from "@/lib/firestore-interview-questions";
+import type { InterviewQuestion } from "@/lib/types";
 
 const categories = [
     {
@@ -44,6 +46,24 @@ const categories = [
 ];
 
 export default function InterviewPracticePage() {
+    const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchQuestions = async () => {
+            setIsLoading(true);
+            try {
+                const fetchedQuestions = await getInterviewQuestions();
+                setQuestions(fetchedQuestions);
+            } catch (error) {
+                console.error("Failed to fetch interview questions:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchQuestions();
+    }, []);
+
     return (
         <div className="container mx-auto max-w-7xl py-12 px-4 space-y-12">
             <header className="text-center">
@@ -77,24 +97,37 @@ export default function InterviewPracticePage() {
             </div>
 
             <div className="space-y-4">
-                {interviewQuestions.map(q => (
-                    <Card key={q.id} className="hover:border-primary/50 transition-colors">
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <h3 className="font-bold">{q.question}</h3>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <Badge variant="outline">{q.category}</Badge>
-                                    <Badge variant="secondary">{q.type}</Badge>
+                 {isLoading ? (
+                    <div className="flex justify-center items-center py-10">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                    </div>
+                ) : questions.length > 0 ? (
+                    questions.map(q => (
+                        <Card key={q.id} className="hover:border-primary/50 transition-colors">
+                            <CardContent className="p-4 flex items-center justify-between">
+                                <div>
+                                    <h3 className="font-bold">{q.question}</h3>
+                                    <div className="flex items-center flex-wrap gap-2 mt-2">
+                                        <Badge variant="outline">{q.category}</Badge>
+                                        <Badge variant="secondary">{q.type}</Badge>
+                                        <Badge variant="secondary" className="bg-yellow-400/10 text-yellow-300">{q.difficulty}</Badge>
+                                        {q.company && <Badge variant="secondary" className="bg-blue-400/10 text-blue-300">{q.company}</Badge>}
+                                        {q.tags?.map(tag => <Badge key={tag} variant="ghost" className="bg-gray-700/50 text-gray-300">{tag}</Badge>)}
+                                    </div>
                                 </div>
-                            </div>
-                            <Link href={`/interview-practice/${q.id}`}>
-                                <Button>
-                                    Practice <ArrowRight className="ml-2" />
-                                </Button>
-                            </Link>
-                        </CardContent>
-                    </Card>
-                ))}
+                                <Link href={`/interview-practice/${q.id}`}>
+                                    <Button>
+                                        Practice <ArrowRight className="ml-2" />
+                                    </Button>
+                                </Link>
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : (
+                    <div className="text-center py-10 text-muted-foreground">
+                        No questions found. Check back later!
+                    </div>
+                )}
             </div>
 
         </div>

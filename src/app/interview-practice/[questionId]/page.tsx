@@ -1,9 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { interviewQuestions } from '@/lib/interview-data';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, Sparkles, Wand2, Mic, Square, FileText } from 'lucide-react';
@@ -19,11 +18,15 @@ import { useAudioRecorder } from '@/hooks/use-audio-recorder';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import type { InterviewQuestion } from '@/lib/types';
+import { getInterviewQuestionById } from '@/lib/firestore-interview-questions';
 
 export default function QuestionPracticePage() {
     const params = useParams();
     const { user } = useAuth();
-    const question = interviewQuestions.find(q => q.id === params.questionId);
+    const questionId = params.questionId as string;
+    const [question, setQuestion] = useState<InterviewQuestion | null>(null);
+    const [isLoadingQuestion, setIsLoadingQuestion] = useState(true);
 
     const [isGenerating, setIsGenerating] = useState(false);
     const [feedback, setFeedback] = useState<GenerateInterviewFeedbackOutput | null>(null);
@@ -33,6 +36,27 @@ export default function QuestionPracticePage() {
     const { toast } = useToast();
     const { addTokens } = useTokenUsage();
     const { startRecording, stopRecording, isRecording, recordingTime, audioBlob, resetRecording } = useAudioRecorder();
+
+    useEffect(() => {
+        if (!questionId) return;
+        const fetchQuestion = async () => {
+            setIsLoadingQuestion(true);
+            try {
+                const fetchedQuestion = await getInterviewQuestionById(questionId);
+                setQuestion(fetchedQuestion);
+            } catch (error) {
+                console.error("Failed to fetch question", error);
+                toast({
+                    variant: "destructive",
+                    title: "Question not found",
+                    description: "This interview question could not be loaded.",
+                });
+            } finally {
+                setIsLoadingQuestion(false);
+            }
+        };
+        fetchQuestion();
+    }, [questionId, toast]);
 
     const handleSubmit = async () => {
         if (!question || !user) return;
@@ -107,6 +131,10 @@ export default function QuestionPracticePage() {
         }
     };
     
+    if (isLoadingQuestion) {
+        return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin"/></div>
+    }
+
     if (!question) {
         return <div className="text-center p-8">Question not found.</div>;
     }

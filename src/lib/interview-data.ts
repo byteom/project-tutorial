@@ -1,12 +1,8 @@
 
-export type InterviewQuestion = {
-    id: string;
-    question: string;
-    category: 'Behavioral' | 'Technical';
-    type: 'General' | 'Backend' | 'Frontend' | 'Full Stack';
-    difficulty: 'Easy' | 'Medium' | 'Hard';
-};
+import type { InterviewQuestion } from './types';
 
+// This file is now deprecated and questions are fetched from Firestore.
+// It is kept for reference or potential fallback scenarios.
 export const interviewQuestions: InterviewQuestion[] = [
     {
         id: 'big-o-notation',

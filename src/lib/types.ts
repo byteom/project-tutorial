@@ -71,3 +71,13 @@ export interface InterviewAnswer {
   createdAt: number; // Timestamp
   transcript?: string;
 }
+
+export type InterviewQuestion = {
+    id: string;
+    question: string;
+    category: 'Behavioral' | 'Technical';
+    type: 'General' | 'Backend' | 'Frontend' | 'Full Stack' | 'DevOps';
+    difficulty: 'Easy' | 'Medium' | 'Hard';
+    company?: string;
+    tags?: string[];
+};

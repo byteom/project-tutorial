@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut, Crown, BrainCircuit } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut, Crown, BrainCircuit, ShieldCheck } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useProjects } from '@/hooks/use-projects';
 import { Input } from '../ui/input';
@@ -157,6 +157,14 @@ export function AppSidebar() {
                             <SidebarMenuButton isActive={pathname.startsWith('/pricing')}>
                                 <Crown />
                                 Pricing
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                     <SidebarMenuItem>
+                        <Link href="/admin/add-question">
+                            <SidebarMenuButton isActive={pathname.startsWith('/admin')}>
+                                <ShieldCheck />
+                                Admin Panel
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
