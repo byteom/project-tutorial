@@ -2,13 +2,15 @@
 "use client";
 
 import { useEffect, useState, useCallback, createContext, useContext } from "react";
-import { auth } from "../lib/firebase";
+import { auth, googleProvider, githubProvider } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut as firebaseSignOut,
   onIdTokenChanged,
   User as FirebaseUser,
+  AuthProvider,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { createUserProfile, getUserProfile } from "@/lib/firestore-users";
@@ -21,6 +23,7 @@ interface AuthContextType {
     error: string | null;
     signIn: (email: string, password: string) => Promise<void>;
     signUp: (email: string, password: string) => Promise<void>;
+    signInWithProvider: (provider: 'google' | 'github') => Promise<void>;
     signOut: () => Promise<void>;
 }
 
@@ -47,7 +50,7 @@ export function useAuth() {
         if (firebaseUser) {
           const userWithProfile = await fetchUserProfile(firebaseUser);
           setUser(userWithProfile);
-          if (window.location.pathname === '/auth') {
+          if (window.location.pathname === '/auth' || window.location.pathname === '/') {
             router.replace('/project-practice');
           }
         } else {
@@ -94,6 +97,21 @@ export function useAuth() {
     }
   }, []);
 
+  const signInWithProvider = useCallback(async (providerName: 'google' | 'github') => {
+    setError(null);
+    setLoading(true);
+    const provider = providerName === 'google' ? googleProvider : githubProvider;
+    try {
+      await signInWithPopup(auth, provider);
+      // onIdTokenChanged will handle user creation and routing
+    } catch (err: any) {
+        setError(err.message);
+        throw err;
+    } finally {
+        setLoading(false);
+    }
+  }, []);
+
   const signOut = useCallback(async () => {
     setError(null);
     try {
@@ -104,5 +122,5 @@ export function useAuth() {
     }
   }, [router]);
 
-  return { user, loading, error, signIn, signUp, signOut };
+  return { user, loading, error, signIn, signUp, signInWithProvider, signOut };
 }

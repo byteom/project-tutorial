@@ -1,8 +1,62 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Bot, Lightbulb, ListChecks, Cpu, GraduationCap, BrainCircuit } from 'lucide-react';
+import { ArrowRight, Bot, Lightbulb, Cpu, GraduationCap, BrainCircuit } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/use-auth';
+
+function HomePageClient() {
+  const { user, signOut } = useAuth();
+  
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
+      <div className="container flex h-14 items-center">
+        <Link href="/" className="mr-6 flex items-center space-x-2">
+          <Cpu className="h-6 w-6 text-primary" />
+          <span className="font-bold font-headline sm:inline-block">
+            PROJECTAI
+          </span>
+        </Link>
+        <nav className="flex items-center space-x-6 text-sm font-medium ml-auto">
+          <Link
+            href="/project-practice"
+            className="transition-colors hover:text-foreground/80 text-foreground/60"
+          >
+            Projects
+          </Link>
+          <Link
+            href="/learn"
+            className="transition-colors hover:text-foreground/80 text-foreground/60"
+          >
+            Learn
+          </Link>
+          <Link
+            href="/interview-practice"
+            className="transition-colors hover:text-foreground/80 text-foreground/60"
+          >
+            Interview Prep
+          </Link>
+          <Link
+            href="/contact"
+            className="transition-colors hover:text-foreground/80 text-foreground/60"
+          >
+            Contact
+          </Link>
+          {user ? (
+            <Button onClick={signOut} variant="outline">Logout</Button>
+          ) : (
+            <Link href="/auth">
+              <Button>Login</Button>
+            </Link>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
 
 export default function WelcomePage() {
   const features = [
@@ -30,47 +84,7 @@ export default function WelcomePage() {
 
   return (
     <div className="flex-1 bg-background text-foreground">
-       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
-            <div className="container flex h-14 items-center">
-              <Link href="/" className="mr-6 flex items-center space-x-2">
-                <Cpu className="h-6 w-6 text-primary" />
-                <span className="font-bold font-headline sm:inline-block">
-                  PROJECTAI
-                </span>
-              </Link>
-              <nav className="flex items-center space-x-6 text-sm font-medium ml-auto">
-                <Link
-                  href="/project-practice"
-                  className="transition-colors hover:text-foreground/80 text-foreground/60"
-                >
-                  Projects
-                </Link>
-                <Link
-                  href="/learn"
-                  className="transition-colors hover:text-foreground/80 text-foreground/60"
-                >
-                  Learn
-                </Link>
-                <Link
-                  href="/interview-practice"
-                  className="transition-colors hover:text-foreground/80 text-foreground/60"
-                >
-                  Interview Prep
-                </Link>
-                <Link
-                  href="/contact"
-                  className="transition-colors hover:text-foreground/80 text-foreground/60"
-                >
-                  Contact
-                </Link>
-                 <Link
-                  href="/auth"
-                >
-                  <Button>Get Started</Button>
-                </Link>
-              </nav>
-            </div>
-          </header>
+      <HomePageClient />
       {/* Hero Section */}
       <section className="py-20 md:py-32 text-center">
         <div className="container px-4">

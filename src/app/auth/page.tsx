@@ -7,9 +7,11 @@ import { Button } from "../../components/ui/button";
 import { Label } from "../../components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { FaGithub, FaGoogle } from "react-icons/fa";
+import { Separator } from "@/components/ui/separator";
 
 export default function AuthPage() {
-  const { user, loading, error, signIn, signUp } = useAuth();
+  const { user, loading, error, signIn, signUp, signInWithProvider } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +34,21 @@ export default function AuthPage() {
         setIsSubmitting(false);
     }
   };
+
+  const handleSocialLogin = async (provider: 'google' | 'github') => {
+    setIsSubmitting(true);
+    try {
+      await signInWithProvider(provider);
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "Social Login Failed",
+        description: err.message || `Could not sign in with ${provider}.`,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
   
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-background to-secondary/30 p-4">
@@ -48,6 +65,22 @@ export default function AuthPage() {
               {mode === "login" ? "Sign in to continue your journey." : "Join us and start building today."}
             </p>
           </div>
+
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" type="button" onClick={() => handleSocialLogin('google')} disabled={isSubmitting}>
+              <FaGoogle className="mr-2" /> Sign in with Google
+            </Button>
+            <Button variant="outline" type="button" onClick={() => handleSocialLogin('github')} disabled={isSubmitting}>
+              <FaGithub className="mr-2" /> Sign in with GitHub
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Separator className="flex-1" />
+            <span className="text-xs text-muted-foreground">OR</span>
+            <Separator className="flex-1" />
+          </div>
+
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -75,8 +108,8 @@ export default function AuthPage() {
             </div>
           </div>
           {error && <div className="text-destructive text-sm text-center">{error}</div>}
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="animate-spin" />}
+          <Button type="submit" className="w-full" disabled={isSubmitting || loading}>
+            {(isSubmitting || loading) && <Loader2 className="animate-spin" />}
             {mode === "login" ? "Login" : "Sign Up"}
           </Button>
           <div className="text-center text-sm mt-2">
