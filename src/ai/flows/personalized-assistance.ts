@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -13,11 +14,11 @@ import {z} from 'zod';
 const PersonalizedAssistanceInputSchema = z.object({
   tutorialStep: z
     .string()
-    .describe('The current step in the tutorial the user is on.'),
+    .describe('The content and instructions for the current tutorial step the user is on.'),
   userProgress: z
     .string()
     .describe(
-      'Description of the users progress on the current step, including any errors or challenges they are facing.'
+      'The user\'s specific question or a description of the error they are facing.'
     ),
 });
 export type PersonalizedAssistanceInput = z.infer<
@@ -28,7 +29,7 @@ const PersonalizedAssistanceOutputSchema = z.object({
   assistanceMessage: z
     .string()
     .describe(
-      'A helpful message providing guidance and support to the user based on their described struggle.'
+      'A helpful message formatted in Markdown that provides guidance and support to the user based on their question and the tutorial context.'
     ),
 });
 export type PersonalizedAssistanceOutput = z.infer<
@@ -45,14 +46,27 @@ const prompt = ai.definePrompt({
     name: 'personalizedAssistancePrompt',
     input: { schema: PersonalizedAssistanceInputSchema },
     output: { schema: PersonalizedAssistanceOutputSchema },
-    prompt: `You are an AI assistant designed to provide personalized assistance to users working through a tutorial.
+    prompt: `You are an expert AI teaching assistant for a software development learning platform.
+Your goal is to provide clear, concise, and encouraging help to users who are stuck on a specific task.
 
-The user is currently on step: "{{tutorialStep}}"
-They are struggling with the following:
+**CONTEXT:**
+The user is working on the following tutorial task:
+---
+{{tutorialStep}}
+---
+
+**USER'S QUESTION/PROBLEM:**
+---
 "{{userProgress}}"
+---
 
-Provide a helpful message that guides them towards resolving their issue and continuing with the tutorial.
-Your message should be encouraging and supportive.`,
+**INSTRUCTIONS:**
+1.  **Analyze the Context:** Carefully read the user's question and the provided tutorial context.
+2.  **Provide a Direct Answer:** Directly address the user's question or problem.
+3.  **Use Markdown:** Format your response using Markdown for readability (e.g., use code fences for code, bold for emphasis, and lists for steps).
+4.  **Be Encouraging:** Maintain a positive and supportive tone. Remind the user that getting stuck is a normal part of learning.
+5.  **Do Not Give the Full Answer:** Do not just give away the complete solution. Guide the user toward finding the solution themselves. Provide hints, suggest what to look for, or explain the relevant concept.
+`,
 });
 
 

@@ -13,14 +13,18 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { generateStepContent } from "@/ai/flows/generate-step-content";
+import { getPersonalizedAssistance, PersonalizedAssistanceOutput } from "@/ai/flows/personalized-assistance";
 import { ArrowLeft, Lightbulb, Loader2, CheckCircle, Circle, Bot, ArrowRight, CheckCircle2 } from "lucide-react";
 import CodeBlock from "@/components/projects/CodeBlock";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 
 export default function ProjectStepPage() {
@@ -41,13 +45,12 @@ export default function ProjectStepPage() {
       if (foundProject) {
         const foundStep = foundProject.steps.find(s => s.id === stepId);
         setStep(foundStep || null);
-        if (foundStep && foundStep.subTasks.length > 0) {
-            // Set the first subtask as active initially
+        if (foundStep && foundStep.subTasks.length > 0 && !activeSubTask) {
             setActiveSubTask(foundStep.subTasks[0]);
         }
       }
     }
-  }, [projectId, stepId, projects, projectsLoading]);
+  }, [projectId, stepId, projects, projectsLoading, activeSubTask]);
 
   const generateAndSetContent = useCallback(async (subTask: SubTask) => {
     if (!project || !step || subTask.content) {
@@ -146,6 +149,7 @@ export default function ProjectStepPage() {
   const stepIndex = project.steps.findIndex(s => s.id === step.id);
   const prevStep = stepIndex > 0 ? project.steps[stepIndex - 1] : null;
   const nextStep = stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null;
+  const activeTaskContext = `Sub-Task: ${activeSubTask?.title}\nDescription: ${activeSubTask?.description}\n\n${activeSubTask?.content}`;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -162,26 +166,49 @@ export default function ProjectStepPage() {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           <main className="lg:col-span-2">
-            <Card className="bg-card/50">
-                <CardContent className="p-8">
-                    {isGeneratingContent && (
-                        <div className="flex items-center gap-3 text-muted-foreground">
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                            <p>Generating content...</p>
-                        </div>
-                    )}
-                    {activeSubTask?.content && (
-                        <div className="prose dark:prose-invert max-w-none">
-                            <ReactMarkdown
-                                rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
-                                components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
-                            >
-                                {activeSubTask.content}
-                            </ReactMarkdown>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            <Tabs defaultValue="instructions" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 max-w-md">
+                <TabsTrigger value="instructions">Instructions</TabsTrigger>
+                <TabsTrigger value="ai-assistant">Ask AI</TabsTrigger>
+              </TabsList>
+              <TabsContent value="instructions">
+                <Card className="bg-card/50 mt-4">
+                    <CardContent className="p-8">
+                        {isGeneratingContent && !activeSubTask?.content && (
+                            <div className="flex items-center gap-3 text-muted-foreground">
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                                <p>Generating content for {activeSubTask?.title}...</p>
+                            </div>
+                        )}
+                        {activeSubTask?.content && (
+                            <div className="prose dark:prose-invert max-w-none">
+                                <ReactMarkdown
+                                    rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
+                                    components={{ pre: ({node, ...props}) => <CodeBlock {...props} /> }}
+                                >
+                                    {activeSubTask.content}
+                                </ReactMarkdown>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="ai-assistant">
+                 <Card className="bg-card/50 mt-4">
+                    <CardHeader>
+                        <CardTitle className="font-headline flex items-center gap-2">
+                           <Bot /> AI Assistant
+                        </CardTitle>
+                        <CardDescription>
+                            Stuck on this task? Ask a question and the AI will try to help you based on the task's content.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                       <PersonalizedAssistance context={activeTaskContext} />
+                    </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </main>
           <aside className="lg:col-span-1">
               <div className="sticky top-24 space-y-8">
@@ -275,6 +302,8 @@ function ChecklistCard({
                                   id={`cb-${subTask.id}`}
                                   checked={subTask.completed}
                                   onCheckedChange={(e) => {
+                                      // Clicks on checkbox should not propagate to the div
+                                      e.preventDefault(); 
                                       e.stopPropagation();
                                       onSubTaskToggle(subTask.id);
                                   }}
@@ -282,10 +311,12 @@ function ChecklistCard({
                               />
                             </div>
                             <div className="grid gap-0.5 leading-none flex-1">
-                                <label htmlFor={`cb-${subTask.id}`} className={`font-medium ${subTask.completed ? 'line-through text-muted-foreground' : ''} cursor-pointer`}>
+                                <label htmlFor={`cb-${subTask.id}`} className={cn(
+                                  "font-medium cursor-pointer",
+                                  subTask.completed ? 'line-through text-muted-foreground' : ''
+                                  )}>
                                     {subTask.title}
                                 </label>
-                                <p className="text-sm text-muted-foreground">{subTask.description}</p>
                             </div>
                         </div>
                     ))}
@@ -294,3 +325,86 @@ function ChecklistCard({
         </Card>
     )
 }
+
+
+const assistanceFormSchema = z.object({
+  question: z.string().min(10, "Please ask a more detailed question."),
+});
+
+function PersonalizedAssistance({ context }: { context: string }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [assistance, setAssistance] = useState<PersonalizedAssistanceOutput | null>(null);
+  const { toast } = useToast();
+
+  const form = useForm<z.infer<typeof assistanceFormSchema>>({
+    resolver: zodResolver(assistanceFormSchema),
+    defaultValues: { question: "" },
+  });
+
+  const onSubmit = async (values: z.infer<typeof assistanceFormSchema>) => {
+    setIsLoading(true);
+    setAssistance(null);
+    try {
+      const result = await getPersonalizedAssistance({
+        tutorialStep: context,
+        userProgress: values.question,
+      });
+      setAssistance(result);
+    } catch (error) {
+      console.error(error);
+      toast({
+        variant: "destructive",
+        title: "Error getting assistance",
+        description: "The AI assistant could not be reached. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="question"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Your Question</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="e.g., 'I'm getting a 'module not found' error. What does that mean?'"
+                    rows={4}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Get Help
+          </Button>
+        </form>
+      </Form>
+        
+      {isLoading && !assistance && (
+        <div className="flex items-center gap-3 text-muted-foreground rounded-lg border p-4">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <p>Thinking...</p>
+        </div>
+      )}
+
+      {assistance?.assistanceMessage && (
+        <div className="prose dark:prose-invert max-w-none rounded-lg border border-primary/20 bg-primary/5 p-4">
+            <ReactMarkdown>
+                {assistance.assistanceMessage}
+            </ReactMarkdown>
+        </div>
+      )}
+    </div>
+  );
+}
+
