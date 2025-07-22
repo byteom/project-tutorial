@@ -18,6 +18,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import type { Metadata } from "next";
+
+// We can't export metadata from a client component, but if this were a server component, it would look like this:
+// export const metadata: Metadata = {
+//   title: "Explore All Projects",
+//   description: "Browse our list of hands-on coding projects. Filter by technology and difficulty to find your next challenge.",
+// };
+
 
 const PROJECTS_PER_PAGE = 9;
 

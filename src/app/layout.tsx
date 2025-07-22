@@ -19,8 +19,12 @@ const fontHeadline = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ProjectForgeAI",
-  description: "AI-powered project-based learning platform",
+  title: {
+    default: "PROJECTAI - Learn by Building Real-World Projects",
+    template: `%s | PROJECTAI`,
+  },
+  description: "Stop watching tutorials and start building. PROJECTAI offers AI-guided, step-by-step learning paths for building real-world applications.",
+  keywords: ["learn to code", "project-based learning", "ai coding assistant", "nextjs projects", "react projects"],
 };
 
 export default function RootLayout({
@@ -54,7 +58,7 @@ export default function RootLayout({
                   Projects
                 </Link>
                 <Link
-                  href="#"
+                  href="/contact"
                   className="transition-colors hover:text-foreground/80 text-foreground/60"
                 >
                   Contact Us
