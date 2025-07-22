@@ -1,12 +1,10 @@
-"use client";
 import { useEffect, useState, useCallback } from "react";
-import { auth, googleProvider } from "../lib/firebase";
+import { auth } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  signInWithPopup,
   User,
 } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -48,16 +46,6 @@ export function useAuth() {
     }
   }, [router]);
 
-  const signInWithGoogle = useCallback(async () => {
-    setError(null);
-    try {
-      await signInWithPopup(auth, googleProvider);
-      router.replace("/project-practice");
-    } catch (err: any) {
-      setError(err.message);
-    }
-  }, [router]);
-
   const signOut = useCallback(async () => {
     setError(null);
     try {
@@ -67,5 +55,5 @@ export function useAuth() {
     }
   }, []);
 
-  return { user, loading, error, signUp, signIn, signInWithGoogle, signOut };
-}
+  return { user, loading, error, signUp, signIn, signOut };
+} 

@@ -162,34 +162,14 @@ export default function ProjectStepPage() {
     }
   };
 
-<<<<<<< HEAD
-  const stepIndex = project ? project.steps.findIndex(s => s.id === stepId) : -1;
-  const prevStep = project && stepIndex > 0 ? project.steps[stepIndex - 1] : null;
-  const nextStep = project && stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null;
-=======
-  if (authLoading || projectsLoading || !projects.length) {
+  const stepIndex = useMemo(() => project ? project.steps.findIndex(s => s.id === stepId) : -1, [project, stepId]);
+  const prevStep = useMemo(() => project && stepIndex > 0 ? project.steps[stepIndex - 1] : null, [project, stepIndex]);
+  const nextStep = useMemo(() => project && stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null, [project, stepIndex]);
+
+  if (authLoading || projectsLoading || !project || !step || !activeSubTask) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
->>>>>>> 88161553f17c129e4ba5ff9097c1d7426a22a48a
 
-  if (projectsLoading || !project || !step || !activeSubTask) {
-    return (
-<<<<<<< HEAD
-        <div className="flex justify-center items-center h-screen">
-            <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-=======
-      <div className="text-center py-16">
-        <h2 className="text-2xl font-bold">Project or step not found</h2>
-        <p className="text-muted-foreground mt-2">The project or step you are looking for does not exist.</p>
-        <Button asChild className="mt-4">
-          <Link href="/project-practice">Go back to projects</Link>
-        </Button>
-      </div>
->>>>>>> 88161553f17c129e4ba5ff9097c1d7426a22a48a
-    );
-  }
-  
   const activeTaskContext = `Task Instructions:\nTitle: ${activeSubTask.title}\nDescription: ${activeSubTask.description}\n\nFull Content:\n${activeSubTask.content}`;
 
   return (

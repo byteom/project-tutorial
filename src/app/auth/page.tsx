@@ -1,36 +1,81 @@
 "use client";
-import { useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../../hooks/use-auth";
+import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import { FcGoogle } from "react-icons/fc";
-import { useRouter } from "next/navigation";
+import { Label } from "../../components/ui/label";
 
 export default function AuthPage() {
-  const { user, loading, error, signInWithGoogle } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (user) {
-      router.replace("/project-practice");
-    }
-  }, [user, router]);
+  const { user, loading, error, signIn, signUp, signOut } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"login" | "signup">("login");
 
   if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
 
+  if (user) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <div>Welcome, {user.email}!</div>
+        <Button onClick={signOut}>Sign Out</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-100 to-purple-200">
-      <div className="bg-white rounded-xl shadow-lg p-10 flex flex-col items-center gap-6 w-96 max-w-full">
-        <h1 className="text-3xl font-bold text-center mb-2">Welcome to ProjectAI</h1>
-        <p className="text-gray-500 text-center mb-4">Sign in to continue</p>
-        <Button
-          onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-2 text-lg font-semibold bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 shadow-sm"
-          variant="outline"
-        >
-          <FcGoogle className="text-2xl" /> Sign in with Google
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          if (mode === "login") {
+            await signIn(email, password);
+          } else {
+            await signUp(email, password);
+          }
+        }}
+        className="flex flex-col gap-4 w-80 p-8 border rounded shadow bg-white"
+      >
+        <h2 className="text-2xl font-bold mb-2">{mode === "login" ? "Login" : "Sign Up"}</h2>
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="mt-1"
+          />
+        </div>
+        {error && <div className="text-red-500 text-sm">{error}</div>}
+        <Button type="submit" className="w-full">
+          {mode === "login" ? "Login" : "Sign Up"}
         </Button>
-        {error && <div className="text-red-500 text-sm text-center">{error}</div>}
-      </div>
+        <div className="text-center text-sm mt-2">
+          {mode === "login" ? (
+            <span>
+              Don't have an account?{' '}
+              <button type="button" className="text-blue-600 underline" onClick={() => setMode("signup")}>Sign Up</button>
+            </span>
+          ) : (
+            <span>
+              Already have an account?{' '}
+              <button type="button" className="text-blue-600 underline" onClick={() => setMode("login")}>Login</button>
+            </span>
+          )}
+        </div>
+      </form>
     </div>
   );
 } 

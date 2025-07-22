@@ -14,9 +14,6 @@ interface StepOutlineCardProps {
 
 export function StepOutlineCard({ subTask, projectId, stepId }: StepOutlineCardProps) {
   const isCompleted = subTask.completed;
-  // A sub-task's own page would be at /projects/[id]/[stepId]#[subTaskId]
-  // Or a more restful API would be /projects/[id]/steps/[stepId]/subtasks/[subTaskId]
-  // For now, let's just link to the step page and use an anchor.
   const href = `/projects/${projectId}/${stepId}#${subTask.id}`;
 
   return (
