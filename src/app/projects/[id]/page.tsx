@@ -2,19 +2,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useProjects } from "@/hooks/use-projects";
 import type { Project } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { ArrowLeft, GitCommit, GraduationCap, Loader2, BookOpen } from "lucide-react";
 import { StepOutlineCard } from "@/components/projects/StepOutlineCard";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProjectSimulation } from "@/components/projects/ProjectSimulation";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function ProjectOutlinePage() {
   const params = useParams();
-  const { projects, updateProject, isLoading } = useProjects();
+  const { projects, isLoading } = useProjects();
   const [project, setProject] = useState<Project | null>(null);
 
   useEffect(() => {
@@ -26,10 +29,10 @@ export default function ProjectOutlinePage() {
   
   const totalProgress = useMemo(() => {
     if (!project || project.steps.length === 0) return 0;
-    const totalSubTasks = project.steps.reduce((acc, step) => acc + step.subTasks.length, 0);
+    const totalSubTasks = project.steps.reduce((acc, step) => acc + (step.subTasks?.length || 0), 0);
     if (totalSubTasks === 0) return 0;
     const completedSubTasks = project.steps.reduce((acc, step) => {
-      return acc + step.subTasks.filter(st => st.completed).length;
+      return acc + (step.subTasks?.filter(st => st.completed).length || 0);
     }, 0);
     return (completedSubTasks / totalSubTasks) * 100;
   }, [project]);
@@ -50,7 +53,7 @@ export default function ProjectOutlinePage() {
     );
   }
 
-  const { id: projectId, steps } = project;
+  const { id: projectId, steps, skills, simulationDiagram } = project;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -68,46 +71,74 @@ export default function ProjectOutlinePage() {
         </div>
       </header>
 
-      <div className="space-y-16">
-        {steps.map((step, index) => {
-            const totalSubTasks = step.subTasks.length;
-            const completedSubTasks = step.subTasks.filter(s => s.completed).length;
-            const stepProgress = totalSubTasks > 0 ? (completedSubTasks / totalSubTasks) * 100 : 0;
-            const isCurrent = (index === 0 && completedSubTasks < totalSubTasks) || (index > 0 && steps[index-1].completed && !step.completed);
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsTrigger value="overview"><BookOpen className="mr-2 h-4 w-4"/>Project Overview</TabsTrigger>
+          <TabsTrigger value="simulation"><GitCommit className="mr-2 h-4 w-4"/>Simulation</TabsTrigger>
+          <TabsTrigger value="skills"><GraduationCap className="mr-2 h-4 w-4"/>Skills Gained</TabsTrigger>
+        </TabsList>
 
-            return (
-                <section key={step.id} className="p-8 rounded-xl border bg-card/50">
-                    <div className="flex items-start gap-6">
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl flex-shrink-0">
-                            {index + 1}
-                        </div>
-                        <div className="flex-1">
-                            <div className="flex items-center gap-4">
-                               <h2 className="font-headline text-3xl">{step.title}</h2>
-                               {isCurrent && <Badge variant="secondary">Current</Badge>}
-                            </div>
-                            <p className="text-muted-foreground mt-1">{step.description}</p>
-                            <div className="mt-4 space-y-2">
-                                <Progress value={stepProgress} className="h-2" />
-                                <p className="text-sm text-muted-foreground">{completedSubTasks} of {totalSubTasks} tasks completed</p>
-                            </div>
-                        </div>
-                    </div>
+        <TabsContent value="overview">
+          <div className="space-y-16">
+            {steps.map((step, index) => {
+                const totalSubTasks = step.subTasks.length;
+                const completedSubTasks = step.subTasks.filter(s => s.completed).length;
+                const stepProgress = totalSubTasks > 0 ? (completedSubTasks / totalSubTasks) * 100 : 0;
+                const isCurrent = (index === 0 && completedSubTasks < totalSubTasks) || (index > 0 && steps[index-1].completed && !step.completed);
 
-                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {step.subTasks.map(subTask => (
-                            <StepOutlineCard 
-                                key={subTask.id}
-                                subTask={subTask}
-                                projectId={projectId}
-                                stepId={step.id}
-                            />
-                        ))}
+                return (
+                    <section key={step.id} className="p-8 rounded-xl border bg-card/50">
+                        <div className="flex items-start gap-6">
+                            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl flex-shrink-0">
+                                {index + 1}
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-4">
+                                  <h2 className="font-headline text-3xl">{step.title}</h2>
+                                  {isCurrent && <Badge variant="secondary">Current</Badge>}
+                                </div>
+                                <p className="text-muted-foreground mt-1">{step.description}</p>
+                                <div className="mt-4 space-y-2">
+                                    <Progress value={stepProgress} className="h-2" />
+                                    <p className="text-sm text-muted-foreground">{completedSubTasks} of {totalSubTasks} tasks completed</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {step.subTasks.map(subTask => (
+                                <StepOutlineCard 
+                                    key={subTask.id}
+                                    subTask={subTask}
+                                    projectId={projectId}
+                                    stepId={step.id}
+                                />
+                            ))}
+                        </div>
+                    </section>
+                );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="simulation">
+          <ProjectSimulation diagram={simulationDiagram || ""} />
+        </TabsContent>
+
+        <TabsContent value="skills">
+            <Card className="bg-card/50">
+                <CardContent className="p-6">
+                     <div className="flex flex-wrap gap-3">
+                        {skills && skills.length > 0 ? (
+                            skills.map(skill => <Badge key={skill} variant="outline" className="text-base py-1 px-3">{skill}</Badge>)
+                        ) : (
+                            <p className="text-muted-foreground">No skills defined for this project.</p>
+                        )}
                     </div>
-                </section>
-            );
-        })}
-      </div>
+                </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

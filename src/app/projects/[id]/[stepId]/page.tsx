@@ -26,6 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useTokenUsage } from "@/hooks/use-token-usage";
+import MiniTask from "@/components/projects/MiniTask";
 
 
 export default function ProjectStepPage() {
@@ -49,8 +50,16 @@ export default function ProjectStepPage() {
         const currentStep = currentProject.steps.find((s) => s.id === stepId);
         if (currentStep) {
           setStep(currentStep);
-          const firstUncompleted = currentStep.subTasks.find(st => !st.completed);
-          setActiveSubTask(firstUncompleted || currentStep.subTasks[0]);
+          // Try to find a sub-task from the URL hash
+          const hash = window.location.hash.substring(1);
+          const subTaskFromHash = currentStep.subTasks.find(st => st.id === hash);
+
+          if (subTaskFromHash) {
+            setActiveSubTask(subTaskFromHash);
+          } else {
+             const firstUncompleted = currentStep.subTasks.find(st => !st.completed);
+             setActiveSubTask(firstUncompleted || currentStep.subTasks[0]);
+          }
         }
       }
     }
@@ -136,6 +145,7 @@ export default function ProjectStepPage() {
   
   const handleSubTaskSelect = (subTask: SubTask) => {
     setActiveSubTask(subTask);
+    router.replace(`/projects/${projectId}/${stepId}#${subTask.id}`);
   };
 
   const handleNextStep = () => {
@@ -144,31 +154,19 @@ export default function ProjectStepPage() {
     }
   };
 
-  if (projectsLoading) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
+  const stepIndex = project ? project.steps.findIndex(s => s.id === stepId) : -1;
+  const prevStep = project && stepIndex > 0 ? project.steps[stepIndex - 1] : null;
+  const nextStep = project && stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null;
 
-  if (!project || !step) {
+  if (projectsLoading || !project || !step || !activeSubTask) {
     return (
-        <div className="text-center py-16">
-            <h2 className="text-2xl font-bold">Step not found</h2>
-            <p className="text-muted-foreground mt-2">The tutorial step you are looking for does not exist.</p>
-            <Button asChild className="mt-4">
-                <Link href={`/projects/${projectId}`}>Back to Outline</Link>
-            </Button>
+        <div className="flex justify-center items-center h-screen">
+            <Loader2 className="h-8 w-8 animate-spin" />
         </div>
     );
   }
   
-  const stepIndex = project.steps.findIndex(s => s.id === step.id);
-  const prevStep = stepIndex > 0 ? project.steps[stepIndex - 1] : null;
-  const nextStep = stepIndex < project.steps.length - 1 ? project.steps[stepIndex + 1] : null;
-
-  if (!activeSubTask) {
-    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  }
-  
-  const activeTaskContext = `Sub-Task: ${activeSubTask.title}\nDescription: ${activeSubTask.description}\n\n${activeSubTask.content}`;
+  const activeTaskContext = `Task Instructions:\nTitle: ${activeSubTask.title}\nDescription: ${activeSubTask.description}\n\nFull Content:\n${activeSubTask.content}`;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -192,11 +190,14 @@ export default function ProjectStepPage() {
               </TabsList>
               <TabsContent value="instructions">
                 <Card className="bg-card/50 mt-4">
-                    <CardContent className="p-8">
+                    <CardHeader>
+                        <CardTitle className="font-headline">{activeSubTask.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
                         {(isGeneratingContent && !activeSubTask.content) && (
                             <div className="flex items-center gap-3 text-muted-foreground">
                                 <Loader2 className="h-5 w-5 animate-spin" />
-                                <p>Generating content for {activeSubTask.title}...</p>
+                                <p>Generating content...</p>
                             </div>
                         )}
                         {activeSubTask.content && (
@@ -219,7 +220,7 @@ export default function ProjectStepPage() {
                            <Bot /> AI Assistant
                         </CardTitle>
                         <CardDescription>
-                            Stuck on this task? Ask a question and the AI will try to help you based on the task's content.
+                            Stuck? Ask a question, paste your code, and the AI will provide adaptive feedback.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -437,11 +438,7 @@ function PersonalizedAssistance({ context }: { context: string }) {
       )}
 
       {assistance?.assistanceMessage && (
-        <div className="prose dark:prose-invert max-w-none rounded-lg border border-primary/20 bg-primary/5 p-4">
-            <ReactMarkdown>
-                {assistance.assistanceMessage}
-            </ReactMarkdown>
-        </div>
+          <MiniTask message={assistance.assistanceMessage} />
       )}
     </div>
   );

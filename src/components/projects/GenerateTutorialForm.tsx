@@ -34,7 +34,7 @@ interface GenerateTutorialFormProps {
 }
 
 const parseTutorial = (output: GenerateTutorialOutput, prompt: string): Project => {
-  const { title, description, steps, tags } = output;
+  const { title, description, steps, tags, skills, simulationDiagram } = output;
 
   return {
     id: `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now()}`,
@@ -43,6 +43,8 @@ const parseTutorial = (output: GenerateTutorialOutput, prompt: string): Project 
     image: `https://placehold.co/600x400.png`,
     dataAiHint: title.split(' ').slice(0, 2).join(' ').toLowerCase(),
     tags: tags || [],
+    skills: skills || [],
+    simulationDiagram: simulationDiagram || '',
     steps: steps.map(step => ({
         ...step,
         completed: false,

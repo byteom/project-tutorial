@@ -22,4 +22,6 @@ export interface Project {
   dataAiHint?: string;
   steps: TutorialStep[];
   tags?: string[];
+  skills?: string[];
+  simulationDiagram?: string;
 }
