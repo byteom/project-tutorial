@@ -73,8 +73,8 @@ The user is working on the following tutorial task:
 **INSTRUCTIONS:**
 1.  **Analyze the Root Cause:** Carefully read the user's question, their code (if provided), and the tutorial context. Identify the core concept or fundamental knowledge the user is missing. (e.g., Are they misunderstanding props? Is it an async/await issue? Do they not grasp a specific CSS concept?).
 2.  **Frame as a Mini-Task or Explanation:** Based on your analysis, generate a response that directly addresses the user's misunderstanding.
-    *   **If it's a conceptual gap:** Provide a clear, concise explanation of the core concept. Use an analogy or a simplified example. Start with a title like `### Mini-Task: Understanding React Props`.
-    *   **If it's a code error:** Pinpoint the error in their code. Explain *why* it's an error based on the underlying principles. Provide a corrected snippet, but also explain the fix. Frame it like `### Let's Fix That Error!`.
+    *   **If it's a conceptual gap:** Provide a clear, concise explanation of the core concept. Use an analogy or a simplified example. Start with a title like \`### Mini-Task: Understanding React Props\`.
+    *   **If it's a code error:** Pinpoint the error in their code. Explain *why* it's an error based on the underlying principles. Provide a corrected snippet, but also explain the fix. Frame it like \`### Let's Fix That Error!\`.
 3.  **Use Markdown:** Format your response for readability (e.g., use headings for your mini-task, code fences for code, bold for emphasis).
 4.  **Be Encouraging:** Maintain a positive and supportive tone. Remind the user that getting stuck is a normal and essential part of the learning process.
 `,
