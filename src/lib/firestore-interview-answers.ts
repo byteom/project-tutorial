@@ -22,6 +22,6 @@ export async function getUserInterviewAnswers(userId: string): Promise<Interview
 }
 
 export async function addInterviewAnswer(userId: string, answerData: Omit<InterviewAnswer, 'userId'>) {
-  const answerWithUser = { ...answerData, userId };
+  const answerWithUser: InterviewAnswer = { ...answerData, userId };
   await setDoc(doc(db, "interviewAnswers", answerData.id), answerWithUser);
 }
