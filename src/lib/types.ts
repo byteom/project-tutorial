@@ -41,7 +41,10 @@ export interface LearningModule {
 }
 
 export interface LearningPath {
+  id: string;
   title: string;
   introduction: string;
   modules: LearningModule[];
+  difficulty: string;
+  topic: string;
 }

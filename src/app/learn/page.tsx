@@ -10,16 +10,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Bot, Loader2 } from "lucide-react";
+import { Bot, Loader2, Trash2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTokenUsage } from "@/hooks/use-token-usage";
-import { generateLearningPath, type GenerateLearningPathOutput } from "@/ai/flows/generate-learning-path";
+import { generateLearningPath } from "@/ai/flows/generate-learning-path";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import rehypePrism from "rehype-prism-plus";
 import CodeBlock from "@/components/projects/CodeBlock";
 import type { LearningPath } from "@/lib/types";
+import { useLearningPaths } from "@/hooks/use-learning-paths";
 
 const formSchema = z.object({
   topic: z.string().min(2, {
@@ -33,8 +34,10 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function LearnAnythingPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [learningPath, setLearningPath] = useState<LearningPath | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const { learningPaths, addLearningPath, deleteLearningPath, isLoading: isLoadingPaths } = useLearningPaths();
+  const [activeLearningPath, setActiveLearningPath] = useState<LearningPath | null>(null);
+
   const { toast } = useToast();
   const { addTokens } = useTokenUsage();
 
@@ -44,8 +47,8 @@ export default function LearnAnythingPage() {
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setIsLoading(true);
-    setLearningPath(null);
+    setIsGenerating(true);
+    setActiveLearningPath(null);
     try {
       const result = await generateLearningPath({
         topic: data.topic,
@@ -56,7 +59,9 @@ export default function LearnAnythingPage() {
         addTokens(result.tokensUsed);
       }
       
-      setLearningPath(result);
+      await addLearningPath(result);
+      setActiveLearningPath(result);
+
       toast({
         title: "Learning Path Generated!",
         description: `Your guide to learning "${result.title}" is ready.`,
@@ -71,9 +76,13 @@ export default function LearnAnythingPage() {
         description: "There was a problem generating the learning path. Please try again.",
       });
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
+
+  const handleSelectPath = (path: LearningPath) => {
+    setActiveLearningPath(path);
+  }
   
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4">
@@ -99,7 +108,7 @@ export default function LearnAnythingPage() {
                       <FormLabel>Topic</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., 'C++', 'Python for Data Science', 'Quantum Computing Basics'"
+                          placeholder="e.g., 'C++', 'Python for Data Science'"
                           {...field}
                         />
                       </FormControl>
@@ -130,8 +139,8 @@ export default function LearnAnythingPage() {
                   )}
                 />
               </div>
-              <Button type="submit" disabled={isLoading} className="w-full">
-                {isLoading ? (
+              <Button type="submit" disabled={isGenerating} className="w-full">
+                {isGenerating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating Curriculum...
@@ -145,22 +154,25 @@ export default function LearnAnythingPage() {
         </CardContent>
       </Card>
 
-      {isLoading && (
+      {isGenerating && (
         <div className="text-center mt-12">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
             <p className="text-muted-foreground mt-4">Building your learning path... this might take a moment.</p>
         </div>
       )}
 
-      {learningPath && (
+      {activeLearningPath && (
         <div className="mt-12 space-y-8">
+          <Button variant="outline" onClick={() => setActiveLearningPath(null)}>
+            Back to My Curriculums
+          </Button>
             <header className="text-center">
-                <h2 className="text-4xl font-bold font-headline">{learningPath.title}</h2>
-                <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">{learningPath.introduction}</p>
+                <h2 className="text-4xl font-bold font-headline">{activeLearningPath.title}</h2>
+                <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">{activeLearningPath.introduction}</p>
             </header>
 
             <Accordion type="single" collapsible className="w-full space-y-4">
-                {learningPath.modules.map((module, index) => (
+                {activeLearningPath.modules.map((module, index) => (
                     <AccordionItem key={module.id} value={`item-${index}`} className="border-b-0">
                         <Card className="bg-card/80">
                             <AccordionTrigger className="p-6 text-left hover:no-underline">
@@ -190,6 +202,33 @@ export default function LearnAnythingPage() {
                     </AccordionItem>
                 ))}
             </Accordion>
+        </div>
+      )}
+
+      {!activeLearningPath && !isGenerating && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold font-headline mb-4">My Curriculums</h2>
+          {isLoadingPaths ? (
+            <p className="text-muted-foreground">Loading your curriculums...</p>
+          ) : learningPaths.length > 0 ? (
+            <div className="space-y-4">
+              {learningPaths.map(path => (
+                <Card key={path.id} className="hover:bg-secondary/50 transition-colors">
+                  <CardContent className="p-4 flex justify-between items-center">
+                    <button onClick={() => handleSelectPath(path)} className="text-left flex-1">
+                      <p className="font-bold">{path.title}</p>
+                      <p className="text-sm text-muted-foreground">{path.topic} - {path.difficulty}</p>
+                    </button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteLearningPath(path.id)}>
+                        <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground">You haven't generated any learning paths yet.</p>
+          )}
         </div>
       )}
     </div>

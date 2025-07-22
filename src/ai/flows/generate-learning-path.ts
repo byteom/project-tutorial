@@ -33,10 +33,13 @@ const LearningModuleSchema = z.object({
 });
 
 const GenerateLearningPathOutputSchema = z.object({
+  id: z.string().describe('A unique ID for the learning path.'),
   title: z.string().describe('The main title of the overall learning path.'),
   introduction: z.string().describe('A short, one-paragraph introduction to the topic.'),
   modules: z.array(LearningModuleSchema).describe('An array of learning modules.'),
   tokensUsed: z.number().optional().describe('The number of tokens used to generate the path.'),
+  topic: z.string().describe("The topic the user wants to learn (e.g., 'C++', 'Python', 'React Native')."),
+  difficulty: z.string().describe("The desired difficulty for the learning path (e.g., 'Easy', 'Medium', 'Hard')."),
 });
 export type GenerateLearningPathOutput = z.infer<typeof GenerateLearningPathOutputSchema>;
 
@@ -58,14 +61,15 @@ Your task is to generate a complete, well-structured learning path with modules 
 **Difficulty Level:** {{{difficulty}}}
 
 **Instructions:**
-1.  **Structure:** Create a series of modules. Each module should represent a major unit of study.
-2.  **Lessons:** Within each module, create several detailed lessons. Each lesson must have a title, a short description, and the full Markdown content for that lesson.
-3.  **Content:** The content for each lesson should be comprehensive. Include clear explanations, examples, and all necessary code snippets. **CRITICAL:** All code must be in fenced code blocks with language identifiers.
-4.  **Difficulty:** The depth and complexity of the modules and lessons should directly correspond to the requested difficulty level.
+1.  **ID**: Generate a unique ID for this learning path. It should be a slug-style string based on the topic and difficulty, like 'learn-react-basics-easy'.
+2.  **Structure:** Create a series of modules. Each module should represent a major unit of study.
+3.  **Lessons:** Within each module, create several detailed lessons. Each lesson must have a title, a short description, and the full Markdown content for that lesson.
+4.  **Content:** The content for each lesson should be comprehensive. Include clear explanations, examples, and all necessary code snippets. **CRITICAL:** All code must be in fenced code blocks with language identifiers.
+5.  **Difficulty:** The depth and complexity of the modules and lessons should directly correspond to the requested difficulty level.
     *   **Easy:** Focus on fundamental concepts, simple examples, and getting started.
     *   **Medium:** Introduce more intermediate concepts, more complex examples, and best practices.
     *   **Hard:** Cover advanced topics, complex use cases, performance considerations, and in-depth theory.
-5.  **Be Exhaustive:** Do not skip details. Provide complete, ready-to-use content for every single lesson. You are generating the entire course at once.
+6.  **Be Exhaustive:** Do not skip details. Provide complete, ready-to-use content for every single lesson. You are generating the entire course at once.
 `,
 });
 
@@ -79,9 +83,13 @@ const generateLearningPathFlow = ai.defineFlow(
     const result = await prompt(input);
     const usage = result.usage;
     const tokensUsed = (usage?.inputTokens || 0) + (usage?.outputTokens || 0);
-
+    const output = result.output!;
+    
     return {
-      ...result.output!,
+      id: `${output.topic.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${output.difficulty.toLowerCase()}-${Date.now()}`,
+      ...output,
+      topic: input.topic,
+      difficulty: input.difficulty,
       tokensUsed: tokensUsed,
     };
   }
