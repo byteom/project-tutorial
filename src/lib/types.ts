@@ -58,3 +58,15 @@ export interface Subscription {
     trial_end?: number; // timestamp
     current_period_end?: number; // timestamp
 }
+
+import type { GenerateInterviewFeedbackOutput } from "@/ai/flows/generate-interview-feedback";
+
+export interface InterviewAnswer {
+  id: string;
+  userId: string;
+  questionId: string;
+  question: string;
+  answer: string;
+  feedback: GenerateInterviewFeedbackOutput;
+  createdAt: number; // Timestamp
+}

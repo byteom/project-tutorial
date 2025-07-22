@@ -18,6 +18,8 @@ import { useTokenUsage } from '@/hooks/use-token-usage';
 import ReactMarkdown from 'react-markdown';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BellCurveChart } from '@/components/charts/BellCurveChart';
+import { useAuth } from '@/hooks/use-auth';
+import { addInterviewAnswer } from '@/lib/firestore-interview-answers';
 
 const formSchema = z.object({
     answer: z.string().min(50, {
@@ -29,6 +31,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function QuestionPracticePage() {
     const params = useParams();
+    const { user } = useAuth();
     const question = interviewQuestions.find(q => q.id === params.questionId);
 
     const [isGenerating, setIsGenerating] = useState(false);
@@ -45,7 +48,7 @@ export default function QuestionPracticePage() {
     });
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
-        if (!question) return;
+        if (!question || !user) return;
         setIsGenerating(true);
         setFeedback(null);
         setLastAnswer(data.answer);
@@ -60,9 +63,20 @@ export default function QuestionPracticePage() {
             }
 
             setFeedback(result);
+            
+            // Save the result to Firestore
+            await addInterviewAnswer(user.uid, {
+                id: `${user.uid}-${question.id}-${Date.now()}`,
+                questionId: question.id,
+                question: question.question,
+                answer: data.answer,
+                feedback: result,
+                createdAt: Date.now(),
+            });
+
             toast({
                 title: 'Feedback Generated!',
-                description: 'Your AI-powered feedback is ready.',
+                description: 'Your AI-powered feedback is ready and saved to your history.',
             });
         } catch (error) {
             console.error('Failed to generate feedback', error);
@@ -193,4 +207,3 @@ export default function QuestionPracticePage() {
         </div>
     );
 }
-

@@ -15,6 +15,7 @@ const categories = [
         icon: <CheckCircle className="h-6 w-6" />,
         color: "bg-gray-800 border-gray-700",
         buttonText: "View your questions",
+        href: "/interview-practice/answered",
     },
     {
         title: "Recommended",
@@ -22,6 +23,7 @@ const categories = [
         icon: <BadgeCheck className="h-6 w-6" />,
         color: "bg-purple-800/20 border-purple-600/50",
         buttonText: "View recommended",
+        href: "#",
     },
     {
         title: "Community Favorites",
@@ -29,6 +31,7 @@ const categories = [
         icon: <MessageSquareHeart className="h-6 w-6" />,
         color: "bg-green-800/20 border-green-600/50",
         buttonText: "View favorites",
+        href: "#",
     },
     {
         title: "Essentials",
@@ -36,6 +39,7 @@ const categories = [
         icon: <FileQuestion className="h-6 w-6" />,
         color: "bg-blue-800/20 border-blue-600/50",
         buttonText: "View our essentials",
+        href: "#",
     },
 ];
 
@@ -62,9 +66,11 @@ export default function InterviewPracticePage() {
                             <CardDescription className="text-gray-300 pt-2">{cat.description}</CardDescription>
                         </CardHeader>
                         <CardContent className="mt-auto">
-                            <button className="w-full text-center bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
-                                {cat.buttonText}
-                            </button>
+                            <Button asChild className="w-full text-center bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
+                                <Link href={cat.href}>
+                                  {cat.buttonText}
+                                </Link>
+                            </Button>
                         </CardContent>
                     </Card>
                 ))}
