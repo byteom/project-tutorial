@@ -43,7 +43,29 @@ export default function ProjectOutlinePage() {
     return (completedSubTasks / totalSubTasks) * 100;
   }, [project]);
 
-  if (authLoading || isLoading || !projects.length) {
+  useEffect(() => {
+    console.log("[DEBUG] authLoading:", authLoading, "user:", user);
+    console.log("[DEBUG] isLoading:", isLoading, "projects:", projects.map(p => p.id));
+    console.log("[DEBUG] params.id:", params.id);
+    if (project) {
+      console.log("[DEBUG] Found project:", project);
+    } else {
+      console.log("[DEBUG] Project not found in loaded projects.");
+    }
+  }, [authLoading, user, isLoading, projects, params.id, project]);
+
+  if (authLoading || isLoading) {
+    return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  }
+
+  if (!user) {
+    if (typeof window !== "undefined") {
+      window.location.replace("/auth");
+    }
+    return null;
+  }
+
+  if (!projects.length) {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
 
