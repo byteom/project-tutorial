@@ -54,7 +54,7 @@ export default function ProjectStepPage() {
             const initialSubTask = firstUncompleted || foundStep.subTasks[0];
             
             // Only set the active subtask if it's not already set to avoid re-renders
-            if (!activeSubTask || activeSubTask.id !== initialSubTask.id) {
+            if (!activeSubTask || (activeSubTask && activeSubTask.id !== initialSubTask.id)) {
                 setActiveSubTask(initialSubTask);
             }
         }
