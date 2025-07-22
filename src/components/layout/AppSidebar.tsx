@@ -56,16 +56,16 @@ export function AppSidebar() {
             <div className="flex-1">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <Link href="/" legacyBehavior passHref>
-                            <SidebarMenuButton as="a" isActive>
+                        <Link href="/">
+                            <SidebarMenuButton isActive>
                                 <LayoutDashboard />
                                 Projects
                             </SidebarMenuButton>
                         </Link>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                        <Link href="/learn" legacyBehavior passHref>
-                            <SidebarMenuButton as="a">
+                        <Link href="/learn">
+                            <SidebarMenuButton>
                                 <BotMessageSquare />
                                 Learn Anything
                                 <Badge variant="secondary" className="ml-auto">BETA</Badge>
@@ -115,8 +115,8 @@ export function AppSidebar() {
                         <SidebarMenu>
                             {ongoingProjects.map((project) => (
                                 <SidebarMenuItem key={project.id}>
-                                    <Link href={`/projects/${project.id}`} legacyBehavior passHref>
-                                        <SidebarMenuButton as="a">
+                                    <Link href={`/projects/${project.id}`}>
+                                        <SidebarMenuButton>
                                             <Orbit className="text-green-500"/>
                                             <span className="truncate">{project.title}</span>
                                         </SidebarMenuButton>
