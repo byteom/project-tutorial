@@ -36,10 +36,10 @@ const prompt = ai.definePrompt({
 The tutorial should be well-structured and use Markdown for formatting.
 
 Your response must follow these rules:
-1.  The first line must be a single H1 heading (e.g., '# My Awesome Tutorial'). This will be the project title.
-2.  The next few lines should be a short, one-paragraph description of the project.
-3.  The rest of the content must be a series of steps, each starting with an H2 heading (e.g., '## Step 1: Setting up').
-4.  All code snippets must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash).
+1.  The very first line must be a single H1 heading for the project title (e.g., '# My Awesome Tutorial').
+2.  After the title, provide a short, one-paragraph description of the project.
+3.  The rest of the content must be a series of steps. Each step must start with an H2 heading (e.g., '## Step 1: Setting up').
+4.  All code snippets must be enclosed in fenced code blocks with the appropriate language identifier (e.g., \`\`\`javascript or \`\`\`bash). Do not include the filename inside the code block fence.
 
 Prompt: {{{prompt}}}`,
 });
