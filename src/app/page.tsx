@@ -65,7 +65,7 @@ export default function WelcomePage() {
           </p>
           <div className="mt-8">
             <Button asChild size="lg">
-              <Link href="/project-practice">
+              <Link href="/auth">
                 Start Your First Project <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -141,7 +141,7 @@ export default function WelcomePage() {
             </p>
             <div className="mt-8">
               <Button asChild size="lg">
-                <Link href="/project-practice">
+                <Link href="/auth">
                   Explore Projects <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>

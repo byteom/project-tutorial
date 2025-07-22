@@ -18,7 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '../ui/button';
-import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop } from 'lucide-react';
+import { Book, Code, Cpu, FlaskConical, GitBranch, GraduationCap, LayoutDashboard, Settings, BotMessageSquare, ChevronDown, ToyBrick, RefreshCcw, Orbit, Laptop, LogOut } from 'lucide-react';
 import { useTokenUsage } from '@/hooks/use-token-usage';
 import { useProjects } from '@/hooks/use-projects';
 import { Input } from '../ui/input';
@@ -29,7 +29,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { useAuth } from '@/hooks/use-auth';
 
 export function AppSidebar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { tokenCount } = useTokenUsage();
   const { projects } = useProjects();
   const { toast } = useToast();
@@ -227,19 +227,22 @@ export function AppSidebar() {
                 )}
             </div>
         </SidebarContent>
-        <SidebarFooter className="p-2">
-            <Link href="/profile" className="w-full">
-                <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-secondary transition-colors">
-                    <Avatar className="h-8 w-8">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`} alt="User Avatar" />
-                        <AvatarFallback>{user.email?.[0].toUpperCase() ?? 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 overflow-hidden">
-                        <p className="text-sm font-semibold truncate">{user.email}</p>
-                    </div>
-                </div>
-            </Link>
-             <p className='text-xs text-center text-muted-foreground pt-4'>
+        <SidebarFooter className="p-2 space-y-2">
+            <div className="flex items-center justify-between p-2 rounded-lg hover:bg-secondary transition-colors group">
+              <Link href="/profile" className="flex items-center gap-3 flex-1 overflow-hidden">
+                  <Avatar className="h-8 w-8">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`} alt="User Avatar" />
+                      <AvatarFallback>{user.email?.[0].toUpperCase() ?? 'U'}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 overflow-hidden">
+                      <p className="text-sm font-semibold truncate">{user.email}</p>
+                  </div>
+              </Link>
+              <Button variant="ghost" size="icon" className="h-8 w-8 opacity-70 group-hover:opacity-100" onClick={signOut}>
+                <LogOut />
+              </Button>
+            </div>
+             <p className='text-xs text-center text-muted-foreground pt-2 border-t'>
                 Made with ❤️ by certifyo-omsingh
             </p>
         </SidebarFooter>

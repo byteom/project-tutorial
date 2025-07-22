@@ -21,13 +21,17 @@ export default function ProjectPracticeLayout({
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+  
+  if (!user) {
+    return null; // or a loading spinner, but layout effect handles redirect
   }
 
   return (
     <SidebarProvider>
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-screen">
         <AppSidebar />
         <main className="flex-1 flex flex-col">{children}</main>
       </div>
