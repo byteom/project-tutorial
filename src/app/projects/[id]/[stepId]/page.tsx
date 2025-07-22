@@ -42,23 +42,19 @@ export default function ProjectStepPage() {
   const [isGeneratingContent, setIsGeneratingContent] = useState(false);
 
   useEffect(() => {
-    if (!projectsLoading && projects.length > 0) {
-      const foundProject = projects.find((p) => p.id === projectId);
-      setProject(foundProject || null);
-      if (foundProject) {
-        const foundStep = foundProject.steps.find(s => s.id === stepId);
-        setStep(foundStep || null);
-        if (foundStep && foundStep.subTasks.length > 0) {
-            const firstUncompleted = foundStep.subTasks.find(st => !st.completed);
-            const initialSubTask = firstUncompleted || foundStep.subTasks[0];
-            
-            if (!activeSubTask || activeSubTask.id !== initialSubTask.id) {
-                setActiveSubTask(initialSubTask);
-            }
+    if (projects.length > 0) {
+      const currentProject = projects.find((p) => p.id === projectId);
+      if (currentProject) {
+        setProject(currentProject);
+        const currentStep = currentProject.steps.find((s) => s.id === stepId);
+        if (currentStep) {
+          setStep(currentStep);
+          const firstUncompleted = currentStep.subTasks.find(st => !st.completed);
+          setActiveSubTask(firstUncompleted || currentStep.subTasks[0]);
         }
       }
     }
-  }, [projectId, stepId, projects, projectsLoading, activeSubTask]);
+  }, [projectId, stepId, projects]);
 
   const generateAndSetContent = useCallback(async (subTask: SubTask) => {
     if (!project || !step || subTask.content) {
@@ -144,12 +140,7 @@ export default function ProjectStepPage() {
 
   const handleNextStep = () => {
     if (project && nextStep) {
-      const nextStepData = project.steps.find(s => s.id === nextStep.id);
-      if (nextStepData) {
-        const firstIncomplete = nextStepData.subTasks.find(st => !st.completed);
-        setActiveSubTask(firstIncomplete || nextStepData.subTasks[0]);
         router.push(`/projects/${project.id}/${nextStep.id}`);
-      }
     }
   };
 
@@ -163,7 +154,7 @@ export default function ProjectStepPage() {
             <h2 className="text-2xl font-bold">Step not found</h2>
             <p className="text-muted-foreground mt-2">The tutorial step you are looking for does not exist.</p>
             <Button asChild className="mt-4">
-                <Link href={`/projects/${project.id}`}>Back to Outline</Link>
+                <Link href={`/projects/${projectId}`}>Back to Outline</Link>
             </Button>
         </div>
     );
@@ -177,7 +168,7 @@ export default function ProjectStepPage() {
     return <div className="flex justify-center items-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
   
-  const activeTaskContext = `Sub-Task: ${activeSubTask?.title}\nDescription: ${activeSubTask?.description}\n\n${activeSubTask?.content}`;
+  const activeTaskContext = `Sub-Task: ${activeSubTask.title}\nDescription: ${activeSubTask.description}\n\n${activeSubTask.content}`;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -202,13 +193,13 @@ export default function ProjectStepPage() {
               <TabsContent value="instructions">
                 <Card className="bg-card/50 mt-4">
                     <CardContent className="p-8">
-                        {(isGeneratingContent && !activeSubTask?.content) && (
+                        {(isGeneratingContent && !activeSubTask.content) && (
                             <div className="flex items-center gap-3 text-muted-foreground">
                                 <Loader2 className="h-5 w-5 animate-spin" />
-                                <p>Generating content for {activeSubTask?.title}...</p>
+                                <p>Generating content for {activeSubTask.title}...</p>
                             </div>
                         )}
-                        {activeSubTask?.content && (
+                        {activeSubTask.content && (
                             <div className="prose dark:prose-invert max-w-none">
                                 <ReactMarkdown
                                     rehypePlugins={[rehypeRaw, [rehypePrism, { showLineNumbers: true }]]}
@@ -242,7 +233,7 @@ export default function ProjectStepPage() {
               <div className="sticky top-24 space-y-8">
                   <ChecklistCard 
                     step={step} 
-                    activeSubTaskId={activeSubTask?.id}
+                    activeSubTaskId={activeSubTask.id}
                     onSubTaskToggle={handleSubTaskToggle}
                     onSubTaskSelect={handleSubTaskSelect}
                    />
