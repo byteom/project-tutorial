@@ -19,11 +19,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  allowedDevOrigins: [
+      "http://localhost:9000",
+      "https://*.cloudworkstations.dev"
+  ],
   experimental: {
-    allowedDevOrigins: [
-        "http://localhost:9000",
-        "https://*.cloudworkstations.dev"
-    ],
   },
 };
 
