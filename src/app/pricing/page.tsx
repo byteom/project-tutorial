@@ -14,6 +14,7 @@ const FreeFeatures = [
     "3 Projects",
     "3 Learning Paths",
     "Community Support",
+    "5 interview questions per day for free, unlimited with Pro",
 ];
 
 const ProFeatures = [
@@ -22,6 +23,8 @@ const ProFeatures = [
     "Unlimited Learning Paths",
     "Personalized Assistance",
     "Priority Support",
+    "Unlimited interview questions",
+    "Unlimited AI-Powered Tutorials",
 ];
 
 export default function PricingPage() {
@@ -71,7 +74,7 @@ export default function PricingPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <p className="text-4xl font-bold">
-                           $10<span className="text-lg font-normal text-muted-foreground">/month</span> 
+                           ₹199<span className="text-lg font-normal text-muted-foreground">/month</span> 
                         </p>
                         <ul className="space-y-2">
                            {ProFeatures.map((feature, i) => (
