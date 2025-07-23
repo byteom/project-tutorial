@@ -1,4 +1,4 @@
-# **App Name**: ProjectForgeAI
+# **App Name**: Project Code
 
 ## Core Features:
 

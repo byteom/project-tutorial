@@ -4,6 +4,8 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
+import Footer from "@/components/layout/Footer";
+import Header from "@/components/layout/Header";
 
 const fontBody = Inter({
   subsets: ["latin"],
@@ -17,10 +19,10 @@ const fontHeadline = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "PROJECTAI - Learn by Building Real-World Projects",
-    template: `%s | PROJECTAI`,
+    default: "Project Code - Learn by Building Real-World Projects",
+    template: `%s | Project Code`,
   },
-  description: "Stop watching tutorials and start building. PROJECTAI offers AI-guided, step-by-step learning paths for building real-world applications.",
+  description: "Stop watching tutorials and start building. Project Code offers AI-guided, step-by-step learning paths for building real-world applications.",
   keywords: ["learn to code", "project-based learning", "ai coding assistant", "nextjs projects", "react projects"],
 };
 

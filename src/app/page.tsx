@@ -6,17 +6,17 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Bot, Lightbulb, Cpu, GraduationCap, BrainCircuit, BookOpen, PenTool, Mic } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
+import Footer from '@/components/layout/Footer';
 
 function HomePageClient() {
   const { user, signOut } = useAuth();
-  
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-14 items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Cpu className="h-6 w-6 text-primary" />
           <span className="font-bold font-headline sm:inline-block">
-            PROJECTAI
+            Project Code
           </span>
         </Link>
         <nav className="flex items-center space-x-6 text-sm font-medium ml-auto">
@@ -118,7 +118,7 @@ export default function WelcomePage() {
       <section className="py-16 bg-secondary/30">
         <div className="container px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold font-headline">Why PROJECTAI?</h2>
+            <h2 className="text-4xl font-bold font-headline">Why Project Code?</h2>
             <p className="text-muted-foreground mt-2">The best way to learn is by doing. Here's how we help.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -189,9 +189,7 @@ export default function WelcomePage() {
             </div>
           </div>
         </section>
-        <footer className="p-4 text-center text-xs text-muted-foreground border-t">
-              AI-Generated Content. Please review this guidance carefully. AI can make mistakes, so always verify critical information and use your judgment.
-          </footer>
+        <Footer />
     </div>
   );
 }

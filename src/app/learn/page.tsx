@@ -45,8 +45,9 @@ export default function LearnAnythingPage() {
   const [activeLearningPath, setActiveLearningPath] = useState<LearningPath | null>(null);
   const { operatingSystem } = useUserPreferences();
   const { subscription, isLoading: isSubscriptionLoading } = useSubscription();
-
   const { toast } = useToast();
+  const isPro = subscription?.status === 'pro';
+
   const { addTokens } = useTokenUsage();
 
   const form = useForm<FormValues>({
@@ -178,6 +179,19 @@ export default function LearnAnythingPage() {
     }
   }, [activeLearningPath, updateLearningPath, addTokens, toast, operatingSystem]);
   
+  const handleDeleteLearningPath = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isPro) {
+      toast({
+        variant: "destructive",
+        title: "Pro Feature",
+        description: "Only Pro users can delete learning curriculums. Upgrade to Pro to unlock this feature.",
+      });
+      return;
+    }
+    await deleteLearningPath(id);
+  };
+
   return (
     <div className="container mx-auto max-w-4xl py-12 px-4">
       <Card className="w-full">
@@ -346,7 +360,7 @@ export default function LearnAnythingPage() {
                       <p className="font-bold">{path.title}</p>
                       <p className="text-sm text-muted-foreground">{path.topic} - {path.difficulty}</p>
                     </button>
-                    <Button variant="ghost" size="icon" onClick={async (e) => { e.stopPropagation(); await deleteLearningPath(path.id); }}>
+                    <Button variant="ghost" size="icon" onClick={(e) => handleDeleteLearningPath(path.id, e)} disabled={!isPro || isLoadingPaths}>
                         <Trash2 className="h-4 w-4" />
                     </Button>
                   </CardContent>

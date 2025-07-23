@@ -9,7 +9,7 @@ export default function Header() {
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <span className="font-bold font-headline sm:inline-block">
-              ProjectForgeAI
+              Project Code
             </span>
           </Link>
         </div>

@@ -1,8 +1,8 @@
-# ProjectForgeAI
+# Project Code
 
 <p align="center">
   <a href="#" target="_blank">
-    <img src="https://placehold.co/600x150/25830e/ffffff/png?text=ProjectForgeAI" alt="ProjectForgeAI Banner">
+    <img src="https://placehold.co/600x150/25830e/ffffff/png?text=Project+Code" alt="Project Code Banner">
   </a>
 </p>
 

@@ -39,7 +39,7 @@ export function AppSidebar() {
   const isAdmin = user?.profile?.roles?.includes('admin') ?? false;
 
   // Gemini API Key logic
-  const GEMINI_KEY_STORAGE = 'projectai_gemini_api_key';
+  const GEMINI_KEY_STORAGE = 'Project Code_gemini_api_key';
   const [geminiKey, setGeminiKey] = React.useState<string | null>(null);
   const [inputKey, setInputKey] = React.useState('');
   const [showPrompt, setShowPrompt] = React.useState(false);
@@ -87,13 +87,14 @@ export function AppSidebar() {
   }
 
   return (
+
     <Sidebar>
         <SidebarHeader>
           <Link href="/" className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="h-8 w-8 text-primary">
                 <Cpu />
             </Button>
-            <span className="font-bold font-headline text-lg">PROJECTAI</span>
+            <span className="font-bold font-headline text-lg">Project Code</span>
           </Link>
         </SidebarHeader>
         <SidebarContent className="flex flex-col p-2">

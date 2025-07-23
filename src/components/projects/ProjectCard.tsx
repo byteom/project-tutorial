@@ -23,6 +23,8 @@ import {
 import { ArrowRight, BookOpen, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { useSubscription } from "@/hooks/use-subscription";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProjectCardProps {
   project: Project;
@@ -30,6 +32,21 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, deleteProject }: ProjectCardProps) {
+  const { subscription, isLoading } = useSubscription();
+  const { toast } = useToast();
+  const isPro = subscription?.status === 'pro';
+
+  const handleDelete = () => {
+    if (!isPro) {
+      toast({
+        variant: "destructive",
+        title: "Pro Feature",
+        description: "Only Pro users can delete projects. Upgrade to Pro to unlock this feature.",
+      });
+      return;
+    }
+    deleteProject(project.id);
+  };
 
   return (
     <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 ease-in-out hover:shadow-lg hover:border-primary/50 bg-card/80 group">
@@ -52,7 +69,7 @@ export function ProjectCard({ project, deleteProject }: ProjectCardProps) {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => deleteProject(project.id)}>
+                    <AlertDialogAction onClick={handleDelete} disabled={!isPro}>
                         Continue
                     </AlertDialogAction>
                     </AlertDialogFooter>
